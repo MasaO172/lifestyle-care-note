@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v44</title>
+<title>生活習慣ケアノート v45</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -571,6 +571,28 @@ body.manual-open{overflow:hidden}
   .manual-viewer-title{font-size:16px}
 }
 
+
+/* v45: HTML版→PWA版 初回移行（写真を含む） */
+.migration-box{
+  margin-top:14px;
+  border:2px solid #8eb7ac;
+  background:#f2f8f6;
+  border-radius:14px;
+  padding:13px;
+}
+.migration-title{
+  font-weight:900;
+  color:#2f6f65;
+  font-size:14px;
+  margin-bottom:5px;
+}
+.migration-box .note{line-height:1.7}
+.migration-size{
+  margin-top:7px;
+  font-size:11px;
+  color:#6f807b;
+}
+
 </style>
 </head>
 <body>
@@ -578,7 +600,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v44</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v45</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -1663,7 +1685,7 @@ body.manual-open{overflow:hidden}
 
   <div class="card">
     <h2>バックアップ</h2>
-    <p class="note">端末変更やブラウザデータ消去に備えて、定期的に完全バックアップを保存してください。iPhoneのSafari/PWAでは、対応している場合は共有画面が開くので「ファイルに保存」を選び、保存先を指定できます。HTML Viewer Qなどの閲覧アプリでは、ダウンロード先がアプリ側の仕様に左右されるため、バックアップ保存の確認はSafari/PWAで行うことを推奨します。<strong> 食事写真は容量が大きくなるため、このJSON完全バックアップには含めません。</strong></p>
+    <p class="note">端末変更やブラウザデータ消去に備えて、定期的に完全バックアップを保存してください。iPhoneのSafari/PWAでは、対応している場合は共有画面が開くので「ファイルに保存」を選び、保存先を指定できます。通常の完全バックアップは容量を小さく保つため、<strong>食事写真を含みません。</strong></p>
 
     <div id="backupReminderBox" class="privacy" style="margin-bottom:12px">
       <div style="font-weight:800">最終バックアップ：<span id="lastBackupDate">未実施</span></div>
@@ -1680,6 +1702,24 @@ body.manual-open{overflow:hidden}
       </label>
     </div>
     <div id="backupStatus" class="status"></div>
+
+    <div class="migration-box">
+      <div class="migration-title">📦 HTML版 → PWA版　初回移行（食事写真を含む）</div>
+      <div class="note">
+        HTML版で入力した記録と食事写真をPWA版へまとめて移すときに使います。
+        写真はBase64形式で移行用JSONに含めるため、<strong>通常のバックアップよりファイルが大きくなります。</strong>
+        日常的なバックアップには上の「完全バックアップ(JSON)」を使用してください。
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button id="exportMigrationBtn" type="button">移行用バックアップ（写真含む）</button>
+        <label class="ghost" style="padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer">
+          移行用バックアップを読み込む
+          <input type="file" id="importMigrationInput" accept=".json,application/json" style="display:none">
+        </label>
+      </div>
+      <div class="migration-size">読み込み時は、移行先にすでにある食事写真をいったん削除し、移行ファイル内の写真に置き換えます。日常・外来・眼科の記録は日付単位で復元／上書きします。</div>
+      <div id="migrationStatus" class="status"></div>
+    </div>
   </div>
 
   <div class="copyright-box" aria-label="著作権とライセンス">
@@ -1721,7 +1761,7 @@ body.manual-open{overflow:hidden}
       <li>眼科受診専用画面を追加し、受診日、次回予定、矯正視力、眼圧、白内障、糖尿病網膜症・黄斑症とその変化、診察メモを記録できます。</li>
       <li>スマートフォン下部は「記録・グラフ・外来・眼科・メニュー」の5タブとし、基礎知識・食事レビュー・履歴・設定はメニュー内にまとめています。</li>
       <li>朝食・昼食・夕食・間食は、文字に加えて1食最大6枚の写真を端末内に圧縮保存できます。写真保存期間は90日・180日・365日・削除しない、から選択できます。</li>
-      <li>食事写真は容量の大きい別データとして保存し、JSON完全バックアップには含めません。</li>
+      <li>食事写真は容量の大きい別データとして保存し、通常のJSON完全バックアップには含めません。HTML版からPWA版へ初回移行する場合のみ、「移行用バックアップ（写真含む）」で写真もまとめて移せます。</li>
       <li>過去30日の食事写真を一覧表示し、AIを使わずに「良い食事の例」「改善を考える食事の例」を各1食選択できます。</li>
       <li>完全バックアップの最終実施日を記録し、30日以上経過すると警告を表示します。</li>
       <li>「基礎知識」は糖尿病・肥満症・脂質異常症・MASH・睡眠時無呼吸症候群に分けて表示しています。肥満症の薬物療法・外科治療は患者向けの一般的な説明のみとし、医療者向け治療選択アルゴリズムは掲載していません。</li>
@@ -3698,15 +3738,11 @@ function downloadBlob(content,name,type){
   const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");
   a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)
 }
-async function saveBackupFile(content,name,type){
+async function saveBackupFile(content,name,type,title="生活習慣ケアノート 完全バックアップ",text="「ファイルに保存」を選び、iCloud Drive または このiPhone内に保存してください。"){
   try{
     const file=new File([content],name,{type});
     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({
-        files:[file],
-        title:"生活習慣ケアノート 完全バックアップ",
-        text:"「ファイルに保存」を選び、iCloud Drive または このiPhone内に保存してください。"
-      });
+      await navigator.share({files:[file],title,text});
       return "shared";
     }
   }catch(e){
@@ -3716,10 +3752,25 @@ async function saveBackupFile(content,name,type){
   downloadBlob(content,name,type);
   return "downloaded";
 }
-async function exportJSON(){
-  const nowIso=new Date().toISOString();
-  const payload={
-    app:"生活習慣ケアノート",version:41,exportedAt:nowIso,
+
+function blobToDataURL(blob){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(String(reader.result||""));
+    reader.onerror=()=>reject(reader.error||new Error("写真を読み込めませんでした"));
+    reader.readAsDataURL(blob)
+  })
+}
+function dataURLToBlob(dataURL){
+  const m=String(dataURL||"").match(/^data:([^;,]+)?(?:;charset=[^;,]+)?;base64,(.*)$/);
+  if(!m)throw new Error("写真データの形式が正しくありません");
+  const mime=m[1]||"image/jpeg",binary=atob(m[2]),bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  return new Blob([bytes],{type:mime})
+}
+async function buildBackupPayload(){
+  return {
+    app:"生活習慣ケアノート",version:45,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
@@ -3737,7 +3788,52 @@ async function exportJSON(){
     dailyRecords:await getAll(DAILY_STORE),
     outpatientRecords:await getAll(VISIT_STORE),
     eyeRecords:loadEyeRecords()
-  };
+  }
+}
+async function exportMigrationBackup(){
+  if(!photoStorageAvailable()){
+    setSaveStatus("migrationStatus","この閲覧環境では食事写真ストレージを利用できません。写真を保存しているHTML版と同じ環境で実行してください。","warn");
+    return
+  }
+  const photos=await getAllMealPhotos();
+  const photoBytes=photos.reduce((s,p)=>s+(p.size||p.blob?.size||0),0);
+  const estimatedJsonBytes=Math.round(photoBytes*1.37);
+  if(photos.length && !confirm(`食事写真 ${photos.length}枚（元画像合計 約${formatBytes(photoBytes)}）を含む移行用バックアップを作成します。\\nBase64化するため、ファイルサイズは概ね ${formatBytes(estimatedJsonBytes)} 以上になります。\\n続けますか？`))return;
+
+  setSaveStatus("migrationStatus",`移行用バックアップを準備しています…（写真 ${photos.length}枚）`,"");
+  const payload=await buildBackupPayload();
+  payload.backupType="migration-with-photos";
+  payload.mealPhotos=[];
+
+  for(let i=0;i<photos.length;i++){
+    const p=photos[i];
+    setSaveStatus("migrationStatus",`写真を変換しています… ${i+1}/${photos.length}`,"");
+    payload.mealPhotos.push({
+      id:p.id,date:p.date,meal:p.meal,mime:p.mime||p.blob?.type||"image/jpeg",
+      size:p.size||p.blob?.size||0,width:p.width||null,height:p.height||null,
+      createdAt:p.createdAt||null,dataURL:await blobToDataURL(p.blob)
+    })
+  }
+
+  const json=JSON.stringify(payload);
+  const name=`lifestyle-care-note-migration-with-photos-${todayISO()}.json`;
+  setSaveStatus("migrationStatus",`移行用ファイルを出力しています…（${formatBytes(new Blob([json]).size)}）`,"");
+  const result=await saveBackupFile(
+    json,name,"application/json",
+    "生活習慣ケアノート 移行用バックアップ",
+    "食事写真を含むHTML版→PWA版の移行用ファイルです。「ファイルに保存」で保管してください。"
+  );
+  if(result==="cancelled"){
+    setSaveStatus("migrationStatus","保存／共有をキャンセルしました。","warn");
+    return
+  }
+  setSaveStatus("migrationStatus",`移行用バックアップを出力しました。写真 ${photos.length}枚を含みます。PWA版の「移行用バックアップを読み込む」から選択してください。`,"ok")
+}
+
+async function exportJSON(){
+  const nowIso=new Date().toISOString();
+  const payload=await buildBackupPayload();
+  payload.exportedAt=nowIso;
   const name=`lifestyle-care-note-backup-${todayISO()}.json`;
   setSaveStatus("backupStatus","バックアップファイルを準備しています…","");
   const result=await saveBackupFile(JSON.stringify(payload,null,2),name,"application/json");
@@ -3763,7 +3859,7 @@ async function exportVisitCSV(){
   const csv="\uFEFF"+[header.join(","),...rows.map(r=>header.map(k=>q(r[k])).join(","))].join("\n");
   downloadBlob(csv,`lifestyle-care-note-outpatient-${todayISO()}.csv`,"text/csv;charset=utf-8")
 }
-async function importJSON(file){
+async function importJSON(file,includePhotos=false){
   const data=JSON.parse(await file.text());
   if(data.settings)saveSettings(data.settings);
   if(data.preferences){
@@ -3808,6 +3904,33 @@ async function importJSON(file){
   for(const r of daily)if(r.date)await putItem(DAILY_STORE,r);
   for(const r of visits)if(r.date)await putItem(VISIT_STORE,r);
   if(eyes.length)saveEyeRecords(eyes.filter(r=>r&&r.date));
+
+  if(includePhotos){
+    if(!Array.isArray(data.mealPhotos))throw new Error("このファイルには食事写真が含まれていません。通常バックアップではなく「移行用バックアップ（写真含む）」を選んでください。");
+    if(!photoStorageAvailable())throw new Error("この環境では食事写真を保存できません。PWA版をSafari/Chromeから開いて実行してください。");
+
+    await clearMealPhotos();
+    const affectedDates=new Set();
+    for(let i=0;i<data.mealPhotos.length;i++){
+      const p=data.mealPhotos[i];
+      setSaveStatus("migrationStatus",`食事写真を復元しています… ${i+1}/${data.mealPhotos.length}`,"");
+      if(!p||!p.date||!p.meal||!p.dataURL)continue;
+      const blob=dataURLToBlob(p.dataURL);
+      await putMealPhoto({
+        id:p.id||newPhotoId(p.date,p.meal,i),
+        date:p.date,meal:p.meal,blob,
+        mime:p.mime||blob.type||"image/jpeg",
+        size:p.size||blob.size,
+        width:p.width||null,height:p.height||null,
+        createdAt:p.createdAt||new Date().toISOString()
+      });
+      affectedDates.add(p.date)
+    }
+    for(const d of affectedDates)await syncDailyRecordPhotoMarker(d);
+    await loadMealPhotosForDate($("date").value);
+    await refreshStorageUsage()
+  }
+
   await refreshAll();loadSettingsToForm();syncPermanentVisitFieldCheckboxes();applyVisitFieldVisibility();syncDailyMeasureSettingCheckboxes();applyDailyMeasureVisibility()
 }
 
@@ -4098,9 +4221,23 @@ $("saveSettingsBtn").onclick=async()=>{
   $("settingsStatus").textContent="設定を保存しました。";updateBMI();await refreshSummary();await refreshWeightReward();await drawHomeChart();await drawVisitCharts()
 };
 $("exportJsonBtn").onclick=exportJSON;$("exportCsvBtn").onclick=exportDailyCSV;$("exportVisitCsvBtn").onclick=exportVisitCSV;
+$("exportMigrationBtn").onclick=exportMigrationBackup;
 $("importJsonInput").onchange=async e=>{
   const f=e.target.files?.[0];if(!f)return;
   try{await importJSON(f);$("backupStatus").textContent="バックアップを復元しました。"}catch(err){$("backupStatus").textContent="復元できませんでした："+err.message}
+  e.target.value=""
+};
+$("importMigrationInput").onchange=async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  if(!confirm("移行用バックアップを読み込みます。\n移行先に現在保存されている食事写真はいったん削除し、移行ファイル内の写真に置き換えます。\n日常・外来・眼科の記録は日付単位で復元／上書きします。続けますか？")){e.target.value="";return}
+  try{
+    setSaveStatus("migrationStatus","移行用バックアップを読み込んでいます…","");
+    await importJSON(f,true);
+    const photoCount=(await getAllMealPhotos()).length;
+    setSaveStatus("migrationStatus",`移行が完了しました。食事写真 ${photoCount}枚を復元しました。記録・履歴・グラフも確認してください。`,"ok");
+  }catch(err){
+    setSaveStatus("migrationStatus","移行できませんでした："+err.message,"warn")
+  }
   e.target.value=""
 };
 $("demoBtn").onclick=createDemo;
@@ -4157,11 +4294,11 @@ window.addEventListener("load",async()=>{
 const MANUAL_DEFINITIONS={
   device:{
     title:"端末利用マニュアル",
-    pages:["./manual_device_01.png","./manual_device_02.png","./manual_device_03.png","./manual_device_04.png","./manual_device_05.png"]
+    pages:["./manual_device_01.png","./manual_device_02.png","./manual_device_03.png","./manual_device_04.png","./manual_device_05.png","./manual_device_06.png"]
   },
   app:{
     title:"生活習慣ケアノート 利用マニュアル",
-    pages:["./manual_app_01.png","./manual_app_02.png","./manual_app_03.png","./manual_app_04.png","./manual_app_05.png","./manual_app_06.png","./manual_app_07.png","./manual_app_08.png"]
+    pages:["./manual_app_01.png","./manual_app_02.png","./manual_app_03.png","./manual_app_04.png","./manual_app_05.png","./manual_app_06.png","./manual_app_07.png","./manual_app_08.png","./manual_app_09.png"]
   }
 };
 
