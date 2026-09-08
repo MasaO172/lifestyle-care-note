@@ -1,6 +1,6 @@
 const CACHE_PREFIX="lifestyle-care-note-";
-const CACHE=CACHE_PREFIX+"v41";
-const ASSETS=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
+const CACHE=CACHE_PREFIX+"v43";
+const ASSETS=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./manual_device_01.png","./manual_device_02.png","./manual_device_03.png","./manual_app_01.png","./manual_app_02.png","./manual_app_03.png"];
 
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
