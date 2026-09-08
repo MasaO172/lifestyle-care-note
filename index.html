@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v43</title>
+<title>生活習慣ケアノート v44</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -578,7 +578,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v43</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v44</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -1606,6 +1606,17 @@ body.manual-open{overflow:hidden}
 
 <section id="view-settings" class="view">
   <div class="card">
+    <h2>利用マニュアル</h2>
+    <p class="note">この画面の中で読めるマニュアルです。PDFをそのまま開くのではなく、各ページを画像として縦に並べて表示します。マニュアル画面の「ツールに戻る」ボタンで元のツールに戻れます。</p>
+    <div class="grid2">
+      <div><button id="openDeviceManualBtn" type="button">端末利用マニュアルを開く</button></div>
+      <div><button id="openAppManualBtn" type="button" class="secondary">生活習慣ケアノート利用マニュアルを開く</button></div>
+    </div>
+    <div class="note" style="margin-top:8px">端末利用マニュアル：iPhone / iPad のSafari・Chrome、AndroidのChromeでの開き方、ホーム画面への追加、バックアップ・更新時の注意など。</div>
+    <div class="note" style="margin-top:4px">ツール利用マニュアル：毎日の入力、食事写真、体重・血糖・血圧グラフ、外来、eGFRスロープ、眼科、履歴、バックアップなどを詳しく説明します。</div>
+  </div>
+
+  <div class="card">
     <h2>基本設定</h2>
     <div class="grid2">
       <div><label for="height">身長 (cm)</label><input type="number" id="height" min="100" max="250" step="0.1" inputmode="decimal"></div>
@@ -1687,17 +1698,6 @@ body.manual-open{overflow:hidden}
 
 
   <div class="card">
-    <h2>利用マニュアル</h2>
-    <p class="note">この画面の中で読めるマニュアルです。PDFをそのまま開くのではなく、各ページを画像として縦に並べて表示します。マニュアル画面の「ツールに戻る」ボタンで元のツールに戻れます。</p>
-    <div class="grid2">
-      <div><button id="openDeviceManualBtn" type="button">端末利用マニュアルを開く</button></div>
-      <div><button id="openAppManualBtn" type="button" class="secondary">生活習慣ケアノート利用マニュアルを開く</button></div>
-    </div>
-    <div class="note" style="margin-top:8px">端末利用マニュアル：Safariでの開き方、ホーム画面への追加、バックアップ・復元、更新時の注意など。</div>
-    <div class="note" style="margin-top:4px">ツール利用マニュアル：記録、グラフ、外来、眼科、設定の使い方など。</div>
-  </div>
-
-  <div class="card">
     <h2>試作用ツール</h2>
     <div class="row">
       <button id="demoBtn" class="secondary">日常30日＋外来6回のサンプルを作成</button>
@@ -1710,7 +1710,7 @@ body.manual-open{overflow:hidden}
     <h2>この試作版について</h2>
     <ul class="note">
       <li>外部ライブラリ・広告・アクセス解析は使用していません。</li>
-      <li>設定画面のバックアップ欄の下に、著作権者・所属・CC BY-NC-ND 4.0のライセンス表示を掲載しています。</li><li>設定画面に「端末利用マニュアル」と「生活習慣ケアノート利用マニュアル」を追加し、PDFを直接開かずにページ画像を縦に並べて読む方式にしています。マニュアル画面には「ツールに戻る」ボタンを付けています。</li>
+      <li>設定画面のバックアップ欄の下に、著作権者・所属・CC BY-NC-ND 4.0のライセンス表示を掲載しています。</li><li>設定画面の一番上に「端末利用マニュアル」と「生活習慣ケアノート利用マニュアル」を配置しています。端末利用マニュアルはiPhone / iPadのSafari・ChromeとAndroidのChromeに対応し、PDFを直接開かずページ画像を縦に並べて読む方式です。マニュアル画面には「ツールに戻る」ボタンを付けています。</li>
       <li>日常記録と外来受診記録を端末内に自動保存します。保存ボタンは補助用です。</li>
       <li>外来受診時には、薬剤変更・治療開始/中止・体調変化・検査の補足などを記録できるフリーコメント欄を常時表示します。</li>
       <li>日常記録の自宅測定は体重を常時表示し、体脂肪率・筋肉量・血糖自己測定・血圧は患者ごとに「普段表示」または「今回だけ追加」を選べます。血圧は朝・夜それぞれ収縮期／拡張期を入力します。</li>
@@ -4157,11 +4157,11 @@ window.addEventListener("load",async()=>{
 const MANUAL_DEFINITIONS={
   device:{
     title:"端末利用マニュアル",
-    pages:["./manual_device_01.png","./manual_device_02.png","./manual_device_03.png"]
+    pages:["./manual_device_01.png","./manual_device_02.png","./manual_device_03.png","./manual_device_04.png","./manual_device_05.png"]
   },
   app:{
     title:"生活習慣ケアノート 利用マニュアル",
-    pages:["./manual_app_01.png","./manual_app_02.png","./manual_app_03.png"]
+    pages:["./manual_app_01.png","./manual_app_02.png","./manual_app_03.png","./manual_app_04.png","./manual_app_05.png","./manual_app_06.png","./manual_app_07.png","./manual_app_08.png"]
   }
 };
 
