@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v45</title>
+<title>生活習慣ケアノート v46</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -572,22 +572,22 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v45: HTML版→PWA版 初回移行（写真を含む） */
-.migration-box{
+/* v46: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+.photo-backup-box{
   margin-top:14px;
   border:2px solid #8eb7ac;
   background:#f2f8f6;
   border-radius:14px;
   padding:13px;
 }
-.migration-title{
+.photo-backup-title{
   font-weight:900;
   color:#2f6f65;
   font-size:14px;
   margin-bottom:5px;
 }
-.migration-box .note{line-height:1.7}
-.migration-size{
+.photo-backup-box .note{line-height:1.7}
+.photo-backup-size{
   margin-top:7px;
   font-size:11px;
   color:#6f807b;
@@ -600,7 +600,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v45</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v46</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -1685,41 +1685,47 @@ body.manual-open{overflow:hidden}
 
   <div class="card">
     <h2>バックアップ</h2>
-    <p class="note">端末変更やブラウザデータ消去に備えて、定期的に完全バックアップを保存してください。iPhoneのSafari/PWAでは、対応している場合は共有画面が開くので「ファイルに保存」を選び、保存先を指定できます。通常の完全バックアップは容量を小さく保つため、<strong>食事写真を含みません。</strong></p>
+    <p class="note">端末変更やブラウザデータ消去に備えて、定期的にバックアップを保存してください。</p>
 
     <div id="backupReminderBox" class="privacy" style="margin-bottom:12px">
       <div style="font-weight:800">最終バックアップ：<span id="lastBackupDate">未実施</span></div>
       <div id="backupReminderText" style="margin-top:3px">まだ完全バックアップが作成されていません。</div>
     </div>
 
+    <div class="section-label">通常の完全バックアップ（写真を含まない）</div>
+    <p class="note" style="margin-top:0">日常記録・外来記録・眼科記録・設定を保存します。食事写真は含まれないため、ファイルサイズを小さく保てます。普段の定期バックアップはこちらを使用してください。</p>
     <div class="row">
       <button id="exportJsonBtn">完全バックアップ(JSON)</button>
-      <button id="exportCsvBtn" class="secondary">日常記録CSV</button>
-      <button id="exportVisitCsvBtn" class="secondary">外来記録CSV</button>
       <label class="ghost" style="padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer">
         バックアップを復元
         <input type="file" id="importJsonInput" accept=".json,application/json" style="display:none">
       </label>
     </div>
-    <div id="backupStatus" class="status"></div>
 
-    <div class="migration-box">
-      <div class="migration-title">📦 HTML版 → PWA版　初回移行（食事写真を含む）</div>
+    <div class="photo-backup-box">
+      <div class="photo-backup-title">📷 完全バックアップ（食事写真を含む）</div>
       <div class="note">
-        HTML版で入力した記録と食事写真をPWA版へまとめて移すときに使います。
-        写真はBase64形式で移行用JSONに含めるため、<strong>通常のバックアップよりファイルが大きくなります。</strong>
-        日常的なバックアップには上の「完全バックアップ(JSON)」を使用してください。
+        日常・外来・眼科の記録と設定に加え、<strong>保存されている食事写真もまとめて保存</strong>します。
+        写真をBase64形式で含めるため、<strong>通常のバックアップよりファイルサイズが大きくなります。</strong>
+        写真が多い場合は、作成・保存・復元に時間がかかることがあります。
       </div>
       <div class="row" style="margin-top:10px">
-        <button id="exportMigrationBtn" type="button">移行用バックアップ（写真含む）</button>
+        <button id="exportPhotoBackupBtn" type="button">完全バックアップ（写真を含む）</button>
         <label class="ghost" style="padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer">
-          移行用バックアップを読み込む
-          <input type="file" id="importMigrationInput" accept=".json,application/json" style="display:none">
+          写真を含むバックアップを復元
+          <input type="file" id="importPhotoBackupInput" accept=".json,application/json" style="display:none">
         </label>
       </div>
-      <div class="migration-size">読み込み時は、移行先にすでにある食事写真をいったん削除し、移行ファイル内の写真に置き換えます。日常・外来・眼科の記録は日付単位で復元／上書きします。</div>
-      <div id="migrationStatus" class="status"></div>
+      <div class="photo-backup-size">復元時は、端末にすでに保存されている食事写真をいったん削除し、バックアップ内の写真に置き換えます。日常・外来・眼科の記録は日付単位で復元／上書きします。</div>
+      <div id="photoBackupStatus" class="status"></div>
     </div>
+
+    <div class="section-label" style="margin-top:16px">CSV書き出し</div>
+    <div class="row">
+      <button id="exportCsvBtn" class="secondary">日常記録CSV</button>
+      <button id="exportVisitCsvBtn" class="secondary">外来記録CSV</button>
+    </div>
+    <div id="backupStatus" class="status"></div>
   </div>
 
   <div class="copyright-box" aria-label="著作権とライセンス">
@@ -1750,18 +1756,18 @@ body.manual-open{overflow:hidden}
     <h2>この試作版について</h2>
     <ul class="note">
       <li>外部ライブラリ・広告・アクセス解析は使用していません。</li>
-      <li>設定画面のバックアップ欄の下に、著作権者・所属・CC BY-NC-ND 4.0のライセンス表示を掲載しています。</li><li>設定画面の一番上に「端末利用マニュアル」と「生活習慣ケアノート利用マニュアル」を配置しています。端末利用マニュアルはiPhone / iPadのSafari・ChromeとAndroidのChromeに対応し、PDFを直接開かずページ画像を縦に並べて読む方式です。マニュアル画面には「ツールに戻る」ボタンを付けています。</li>
+      <li>設定画面のバックアップ欄の下に、著作権者・所属・CC BY-NC-ND 4.0のライセンス表示を掲載しています。</li><li>設定画面の一番上に「端末利用マニュアル」と「生活習慣ケアノート利用マニュアル」を配置しています。端末利用マニュアルはiPhone / iPadのSafari・Chrome、AndroidのChrome、MacのSafari、Windows / MacのChromeに対応します。生活習慣ケアノート利用マニュアルは操作画面例付きです。どちらもPDFを直接開かずページ画像を縦に並べて読み、マニュアル画面の「ツールに戻る」ボタンで戻れます。</li>
       <li>日常記録と外来受診記録を端末内に自動保存します。保存ボタンは補助用です。</li>
       <li>外来受診時には、薬剤変更・治療開始/中止・体調変化・検査の補足などを記録できるフリーコメント欄を常時表示します。</li>
       <li>日常記録の自宅測定は体重を常時表示し、体脂肪率・筋肉量・血糖自己測定・血圧は患者ごとに「普段表示」または「今回だけ追加」を選べます。血圧は朝・夜それぞれ収縮期／拡張期を入力します。</li>
       <li>「排便あり」は「今回だけ項目を追加」専用です。選択して追加した時点で排便ありとして記録し、入力画面にはチェック欄を出さず「排便あり」の文字だけを表示します。排便があった日は自宅体重グラフに「＊」を表示します。</li>
       <li>血糖自己測定グラフは「同じ時間帯を線で結ぶ」を初期設定とし、「測定順に点を結ぶ」にも切り替えられます。背景は70未満・70〜180・181以上の3領域を色分けします。</li>
       <li>血糖自己測定グラフの下に、選択中の表示期間について、朝食前・朝食後・昼食前・昼食後・夕食前・夕食後・眠前それぞれの平均血糖値と測定回数を表示します。</li>
-      <li>自宅血圧グラフは、収縮期・拡張期を朝→夜→翌朝の順に結ぶ表示を初期設定とし、朝だけ／夜だけにも切り替えられます。表示期間内の朝・夜それぞれの収縮期・拡張期平均も表示します。</li>
+      <li>自宅血圧グラフは、収縮期・拡張期を朝→夜→翌朝の順に結ぶ表示を初期設定とし、朝・夜を別々の線で表示する方式にも切り替えられます。表示期間内の朝・夜それぞれの収縮期・拡張期平均も表示します。</li>
       <li>眼科受診専用画面を追加し、受診日、次回予定、矯正視力、眼圧、白内障、糖尿病網膜症・黄斑症とその変化、診察メモを記録できます。</li>
-      <li>スマートフォン下部は「記録・グラフ・外来・眼科・メニュー」の5タブとし、基礎知識・食事レビュー・履歴・設定はメニュー内にまとめています。</li>
+      <li>下部メニューは8項目を横スクロールせず、上段4項目・下段4項目の2段で表示します。高齢の方にも見やすいよう文字とタップ領域を大きめにしています。</li>
       <li>朝食・昼食・夕食・間食は、文字に加えて1食最大6枚の写真を端末内に圧縮保存できます。写真保存期間は90日・180日・365日・削除しない、から選択できます。</li>
-      <li>食事写真は容量の大きい別データとして保存し、通常のJSON完全バックアップには含めません。HTML版からPWA版へ初回移行する場合のみ、「移行用バックアップ（写真含む）」で写真もまとめて移せます。</li>
+      <li>食事写真は容量の大きい別データとして保存します。通常の完全バックアップには含めませんが、「完全バックアップ（写真を含む）」では食事写真もまとめて保存できます。</li>
       <li>過去30日の食事写真を一覧表示し、AIを使わずに「良い食事の例」「改善を考える食事の例」を各1食選択できます。</li>
       <li>完全バックアップの最終実施日を記録し、30日以上経過すると警告を表示します。</li>
       <li>「基礎知識」は糖尿病・肥満症・脂質異常症・MASH・睡眠時無呼吸症候群に分けて表示しています。肥満症の薬物療法・外科治療は患者向けの一般的な説明のみとし、医療者向け治療選択アルゴリズムは掲載していません。</li>
@@ -3770,7 +3776,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:45,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:46,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
@@ -3790,24 +3796,27 @@ async function buildBackupPayload(){
     eyeRecords:loadEyeRecords()
   }
 }
-async function exportMigrationBackup(){
+async function exportPhotoBackup(){
   if(!photoStorageAvailable()){
-    setSaveStatus("migrationStatus","この閲覧環境では食事写真ストレージを利用できません。写真を保存しているHTML版と同じ環境で実行してください。","warn");
+    setSaveStatus("photoBackupStatus","この閲覧環境では食事写真ストレージを利用できません。写真保存に対応したSafari/Chrome/PWAで実行してください。","warn");
     return
   }
   const photos=await getAllMealPhotos();
   const photoBytes=photos.reduce((s,p)=>s+(p.size||p.blob?.size||0),0);
   const estimatedJsonBytes=Math.round(photoBytes*1.37);
-  if(photos.length && !confirm(`食事写真 ${photos.length}枚（元画像合計 約${formatBytes(photoBytes)}）を含む移行用バックアップを作成します。\\nBase64化するため、ファイルサイズは概ね ${formatBytes(estimatedJsonBytes)} 以上になります。\\n続けますか？`))return;
+  const sizeMessage=photos.length
+    ?`食事写真 ${photos.length}枚（元画像合計 約${formatBytes(photoBytes)}）を含みます。\nBase64化するため、バックアップファイルは概ね ${formatBytes(estimatedJsonBytes)} 以上となり、通常のバックアップより大きくなります。\n続けますか？`
+    :`現在、保存されている食事写真はありません。\n写真を含む完全バックアップを作成しますか？`;
+  if(!confirm(sizeMessage))return;
 
-  setSaveStatus("migrationStatus",`移行用バックアップを準備しています…（写真 ${photos.length}枚）`,"");
+  setSaveStatus("photoBackupStatus",`写真を含む完全バックアップを準備しています…（写真 ${photos.length}枚）`,"");
   const payload=await buildBackupPayload();
-  payload.backupType="migration-with-photos";
+  payload.backupType="full-with-photos";
   payload.mealPhotos=[];
 
   for(let i=0;i<photos.length;i++){
     const p=photos[i];
-    setSaveStatus("migrationStatus",`写真を変換しています… ${i+1}/${photos.length}`,"");
+    setSaveStatus("photoBackupStatus",`写真を変換しています… ${i+1}/${photos.length}`,"");
     payload.mealPhotos.push({
       id:p.id,date:p.date,meal:p.meal,mime:p.mime||p.blob?.type||"image/jpeg",
       size:p.size||p.blob?.size||0,width:p.width||null,height:p.height||null,
@@ -3816,18 +3825,20 @@ async function exportMigrationBackup(){
   }
 
   const json=JSON.stringify(payload);
-  const name=`lifestyle-care-note-migration-with-photos-${todayISO()}.json`;
-  setSaveStatus("migrationStatus",`移行用ファイルを出力しています…（${formatBytes(new Blob([json]).size)}）`,"");
+  const name=`lifestyle-care-note-full-with-photos-${todayISO()}.json`;
+  setSaveStatus("photoBackupStatus",`バックアップファイルを出力しています…（${formatBytes(new Blob([json]).size)}）`,"");
   const result=await saveBackupFile(
     json,name,"application/json",
-    "生活習慣ケアノート 移行用バックアップ",
-    "食事写真を含むHTML版→PWA版の移行用ファイルです。「ファイルに保存」で保管してください。"
+    "生活習慣ケアノート 完全バックアップ（写真を含む）",
+    "食事写真を含む完全バックアップです。「ファイルに保存」で保管してください。"
   );
   if(result==="cancelled"){
-    setSaveStatus("migrationStatus","保存／共有をキャンセルしました。","warn");
+    setSaveStatus("photoBackupStatus","保存／共有をキャンセルしました。","warn");
     return
   }
-  setSaveStatus("migrationStatus",`移行用バックアップを出力しました。写真 ${photos.length}枚を含みます。PWA版の「移行用バックアップを読み込む」から選択してください。`,"ok")
+  localStorage.setItem(LAST_BACKUP_KEY,new Date().toISOString());
+  refreshBackupReminder();
+  setSaveStatus("photoBackupStatus",`写真を含む完全バックアップを出力しました。写真 ${photos.length}枚を含みます。通常のバックアップよりファイルサイズが大きくなります。`,"ok")
 }
 
 async function exportJSON(){
@@ -3861,6 +3872,9 @@ async function exportVisitCSV(){
 }
 async function importJSON(file,includePhotos=false){
   const data=JSON.parse(await file.text());
+  if(includePhotos && !Array.isArray(data.mealPhotos)){
+    throw new Error("このファイルには食事写真が含まれていません。「完全バックアップ（写真を含む）」で作成したファイルを選んでください。");
+  }
   if(data.settings)saveSettings(data.settings);
   if(data.preferences){
     if(Array.isArray(data.preferences.visitFields))saveVisitFieldSettings(data.preferences.visitFields);
@@ -3906,14 +3920,14 @@ async function importJSON(file,includePhotos=false){
   if(eyes.length)saveEyeRecords(eyes.filter(r=>r&&r.date));
 
   if(includePhotos){
-    if(!Array.isArray(data.mealPhotos))throw new Error("このファイルには食事写真が含まれていません。通常バックアップではなく「移行用バックアップ（写真含む）」を選んでください。");
-    if(!photoStorageAvailable())throw new Error("この環境では食事写真を保存できません。PWA版をSafari/Chromeから開いて実行してください。");
+    if(!Array.isArray(data.mealPhotos))throw new Error("このファイルには食事写真が含まれていません。通常バックアップではなく「完全バックアップ（写真を含む）」を選んでください。");
+    if(!photoStorageAvailable())throw new Error("この環境では食事写真を保存できません。写真保存に対応したSafari/Chrome/PWAで実行してください。");
 
     await clearMealPhotos();
     const affectedDates=new Set();
     for(let i=0;i<data.mealPhotos.length;i++){
       const p=data.mealPhotos[i];
-      setSaveStatus("migrationStatus",`食事写真を復元しています… ${i+1}/${data.mealPhotos.length}`,"");
+      setSaveStatus("photoBackupStatus",`食事写真を復元しています… ${i+1}/${data.mealPhotos.length}`,"");
       if(!p||!p.date||!p.meal||!p.dataURL)continue;
       const blob=dataURLToBlob(p.dataURL);
       await putMealPhoto({
@@ -4221,22 +4235,22 @@ $("saveSettingsBtn").onclick=async()=>{
   $("settingsStatus").textContent="設定を保存しました。";updateBMI();await refreshSummary();await refreshWeightReward();await drawHomeChart();await drawVisitCharts()
 };
 $("exportJsonBtn").onclick=exportJSON;$("exportCsvBtn").onclick=exportDailyCSV;$("exportVisitCsvBtn").onclick=exportVisitCSV;
-$("exportMigrationBtn").onclick=exportMigrationBackup;
+$("exportPhotoBackupBtn").onclick=exportPhotoBackup;
 $("importJsonInput").onchange=async e=>{
   const f=e.target.files?.[0];if(!f)return;
   try{await importJSON(f);$("backupStatus").textContent="バックアップを復元しました。"}catch(err){$("backupStatus").textContent="復元できませんでした："+err.message}
   e.target.value=""
 };
-$("importMigrationInput").onchange=async e=>{
+$("importPhotoBackupInput").onchange=async e=>{
   const f=e.target.files?.[0];if(!f)return;
-  if(!confirm("移行用バックアップを読み込みます。\n移行先に現在保存されている食事写真はいったん削除し、移行ファイル内の写真に置き換えます。\n日常・外来・眼科の記録は日付単位で復元／上書きします。続けますか？")){e.target.value="";return}
+  if(!confirm("食事写真を含む完全バックアップを復元します。\nこの端末に現在保存されている食事写真はいったん削除し、バックアップ内の写真に置き換えます。\n日常・外来・眼科の記録は日付単位で復元／上書きします。続けますか？")){e.target.value="";return}
   try{
-    setSaveStatus("migrationStatus","移行用バックアップを読み込んでいます…","");
+    setSaveStatus("photoBackupStatus","写真を含むバックアップを読み込んでいます…","");
     await importJSON(f,true);
     const photoCount=(await getAllMealPhotos()).length;
-    setSaveStatus("migrationStatus",`移行が完了しました。食事写真 ${photoCount}枚を復元しました。記録・履歴・グラフも確認してください。`,"ok");
+    setSaveStatus("photoBackupStatus",`復元が完了しました。食事写真 ${photoCount}枚を復元しました。記録・履歴・グラフも確認してください。`,"ok");
   }catch(err){
-    setSaveStatus("migrationStatus","移行できませんでした："+err.message,"warn")
+    setSaveStatus("photoBackupStatus","復元できませんでした："+err.message,"warn")
   }
   e.target.value=""
 };
@@ -4298,7 +4312,7 @@ const MANUAL_DEFINITIONS={
   },
   app:{
     title:"生活習慣ケアノート 利用マニュアル",
-    pages:["./manual_app_01.png","./manual_app_02.png","./manual_app_03.png","./manual_app_04.png","./manual_app_05.png","./manual_app_06.png","./manual_app_07.png","./manual_app_08.png","./manual_app_09.png"]
+    pages:["./manual_app_01.png","./manual_app_02.png","./manual_app_03.png","./manual_app_04.png","./manual_app_05.png","./manual_app_06.png","./manual_app_07.png","./manual_app_08.png","./manual_app_09.png","./manual_app_10.png","./manual_app_11.png"]
   }
 };
 
