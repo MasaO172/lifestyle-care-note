@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v47</title>
+<title>生活習慣ケアノート v48</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -572,7 +572,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v47: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+/* v48: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
 .photo-backup-box{
   margin-top:14px;
   border:2px solid #8eb7ac;
@@ -593,6 +593,33 @@ body.manual-open{overflow:hidden}
   color:#6f807b;
 }
 
+
+/* v48: SMBG範囲別割合（CGM風の参考表示） */
+.smbg-range-wrap{margin-top:14px}
+.smbg-range-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:8px;
+}
+.smbg-range-card{
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:11px 8px;
+  text-align:center;
+  min-width:0;
+}
+.smbg-range-card.tbr{background:#fdeaea;border-color:#efcaca}
+.smbg-range-card.tir{background:#e9f7ee;border-color:#c8e5d2}
+.smbg-range-card.tar{background:#fff7d6;border-color:#eadca8}
+.smbg-range-label{font-size:12px;font-weight:900;color:#485a55}
+.smbg-range-value{font-size:24px;font-weight:900;line-height:1.2;margin-top:4px;color:#294f45}
+.smbg-range-def{font-size:10px;font-weight:700;color:#697a75;margin-top:2px}
+.smbg-range-n{font-size:10px;color:#7e8e89;margin-top:3px}
+@media(max-width:430px){
+  .smbg-range-grid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -600,7 +627,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v47</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v48</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -887,6 +914,13 @@ body.manual-open{overflow:hidden}
       <div id="smbgAverageGrid" class="smbg-average-grid"></div>
     </div>
 
+    <div class="smbg-range-wrap">
+      <div class="section-label" style="margin-top:0">SMBGの範囲別割合（参考）</div>
+      <div class="note" style="margin-top:0">表示期間内に入力された血糖自己測定値について、CGMと同じ区分で割合を計算します。<strong>これは測定回数の割合であり、CGMの「時間の割合」とは異なる参考値です。</strong></div>
+      <div id="smbgRangeGrid" class="smbg-range-grid"></div>
+      <div id="smbgRangeTotal" class="note" style="margin-top:7px"></div>
+    </div>
+
     <div class="smbg-low-wrap">
       <div class="section-label" style="margin-top:0">血糖70 mg/dL未満の回数</div>
       <div class="note" style="margin-top:0">グラフで選択している期間について、70 mg/dL未満だった回数を測定時間帯ごとに集計します。</div>
@@ -919,7 +953,7 @@ body.manual-open{overflow:hidden}
         <span><i style="background:#2f6f65"></i>収縮期</span>
         <span><i style="background:#b06d47"></i>拡張期</span>
       </div>
-      <div class="note" style="margin-top:8px">測定していない時点は空白とし、その前後を線で結びません。</div>
+      <div class="note" style="margin-top:8px">測定していない時点は空白とし、その前後を線で結びません。<strong>太く濃い横線は家庭血圧の降圧目標の一般的な目安（収縮期125 / 拡張期75 mmHg）</strong>です。患者さんごとの目標は主治医の指示を優先してください。</div>
       <div style="margin-top:14px">
         <div class="section-label" style="margin-top:0">表示期間内の平均血圧</div>
         <div class="note" style="margin-top:0">朝・夜それぞれの収縮期血圧と拡張期血圧の平均値を自動計算します。</div>
@@ -1762,7 +1796,7 @@ body.manual-open{overflow:hidden}
       <li>日常記録の自宅測定は体重を常時表示し、体脂肪率・筋肉量・血糖自己測定・血圧は患者ごとに「普段表示」または「今回だけ追加」を選べます。血圧は朝・夜それぞれ収縮期／拡張期を入力します。</li>
       <li>「排便あり」は「今回だけ項目を追加」専用です。選択して追加した時点で排便ありとして記録し、入力画面にはチェック欄を出さず「排便あり」の文字だけを表示します。排便があった日は自宅体重グラフに「＊」を表示します。</li>
       <li>血糖自己測定グラフは「同じ時間帯を線で結ぶ」を初期設定とし、「測定順に点を結ぶ」にも切り替えられます。背景は70未満・70〜180・181以上の3領域を色分けします。</li>
-      <li>血糖自己測定グラフの下に、選択中の表示期間について、朝食前・朝食後・昼食前・昼食後・夕食前・夕食後・眠前それぞれの平均血糖値と測定回数を表示します。</li>
+      <li>血糖自己測定グラフの下に、選択中の表示期間について、朝食前・朝食後・昼食前・昼食後・夕食前・夕食後・眠前それぞれの平均血糖値と測定回数を表示します。</li><li>血糖自己測定では、表示期間内の測定値についてTBR（70未満）・TIR（70〜180）・TAR（180超）の測定回数割合を参考値として表示します。CGMの時間割合とは異なります。</li>
       <li>自宅血圧グラフは、収縮期・拡張期を朝→夜→翌朝の順に結ぶ表示を初期設定とし、朝・夜を別々の線で表示する方式にも切り替えられます。表示期間内の朝・夜それぞれの収縮期・拡張期平均も表示します。</li>
       <li>眼科受診専用画面を追加し、受診日、次回予定、矯正視力、眼圧、白内障、糖尿病網膜症・黄斑症とその変化、診察メモを記録できます。</li>
       <li>下部メニューは8項目を横スクロールせず、上段4項目・下段4項目の2段で表示します。高齢の方にも見やすいよう文字とタップ領域を大きめにしています。</li>
@@ -3123,6 +3157,43 @@ function renderSmbgAverages(records){
 }
 
 
+
+function renderSmbgRangePercentages(records){
+  const grid=$("smbgRangeGrid"),totalBox=$("smbgRangeTotal");
+  if(!grid||!totalBox)return;
+
+  const values=[];
+  records.forEach(r=>SMBG_KEYS.forEach(k=>{
+    const v=r[k];
+    if(v!==null&&v!==undefined&&Number.isFinite(Number(v)))values.push(Number(v))
+  }));
+
+  const total=values.length;
+  const tbr=values.filter(v=>v<70).length;
+  const tir=values.filter(v=>v>=70&&v<=180).length;
+  const tar=values.filter(v=>v>180).length;
+  const pct=n=>total?100*n/total:0;
+
+  const defs=[
+    {cls:"tbr",label:"TBR",def:"70 mg/dL未満",n:tbr},
+    {cls:"tir",label:"TIR",def:"70〜180 mg/dL",n:tir},
+    {cls:"tar",label:"TAR",def:"180 mg/dL超",n:tar}
+  ];
+
+  grid.innerHTML=defs.map(x=>`
+    <div class="smbg-range-card ${x.cls}">
+      <div class="smbg-range-label">${x.label}</div>
+      <div class="smbg-range-value">${total?pct(x.n).toFixed(1):"—"}${total?"%":""}</div>
+      <div class="smbg-range-def">${x.def}</div>
+      <div class="smbg-range-n">${total?`${x.n} / ${total}回`:"記録なし"}</div>
+    </div>
+  `).join("");
+
+  totalBox.textContent=total
+    ?`表示期間内の血糖自己測定 ${total}回を集計しています。TBR＋TIR＋TAR＝100%です。`
+    :"表示期間内に血糖自己測定の記録がありません。";
+}
+
 function renderSmbgLowCounts(records){
   const grid=$("smbgLowGrid"),totalBox=$("smbgLowTotal");
   if(!grid||!totalBox)return;
@@ -3157,6 +3228,7 @@ async function drawSmbgChart(){
   const svg=$("smbgChart");
   const records=dateRangeFilter(await getAll(DAILY_STORE),selectedSmbgPeriod).sort((a,b)=>a.date.localeCompare(b.date));
   renderSmbgAverages(records);
+  renderSmbgRangePercentages(records);
   renderSmbgLowCounts(records);
   svg.innerHTML="";
   const vals=[];
@@ -3251,11 +3323,13 @@ function updateBpChartModeUI(){
     $("bpChartLegend").innerHTML=
       '<span><i style="background:#2f6f65"></i>収縮期</span>'+
       '<span><i style="background:#b06d47"></i>拡張期</span>'+
+      '<span><i style="background:#263a35;height:4px"></i>家庭血圧の目標目安 125/75</span>'+
       '<span>朝→夜→翌朝を連続</span>';
   }else{
     $("bpChartLegend").innerHTML=
       '<span><i style="background:#2f6f65"></i>収縮期</span>'+
       '<span><i style="background:#b06d47"></i>拡張期</span>'+
+      '<span><i style="background:#263a35;height:4px"></i>家庭血圧の目標目安 125/75</span>'+
       '<span><i style="background:#40524e"></i>朝＝実線</span>'+
       '<span><i style="background:#40524e;height:0;border-top:3px dashed #40524e"></i>夜＝破線</span>';
   }
@@ -3285,12 +3359,27 @@ async function drawBpChart(){
   const values=[];records.forEach(r=>keys.forEach(k=>{if(r[k]!==null&&r[k]!==undefined)values.push(Number(r[k]))}));
   if(!values.length){svg.appendChild(svgEl("text",{x:360,y:205,"text-anchor":"middle",fill:"#788783","font-size":"20"},"この期間に自宅血圧の記録がありません"));return}
   const W=720,H=410,L=58,R=18,T=22,B=62;
+  const HOME_BP_TARGET_SBP=125,HOME_BP_TARGET_DBP=75;
   let yMin=Math.max(20,Math.floor((Math.min(...values)-15)/10)*10),yMax=Math.ceil((Math.max(...values)+15)/10)*10;
+  yMin=Math.min(yMin,HOME_BP_TARGET_DBP-10);
+  yMax=Math.max(yMax,HOME_BP_TARGET_SBP+15);
   if(yMax-yMin<80){const mid=(yMin+yMax)/2;yMin=Math.max(20,Math.floor((mid-40)/10)*10);yMax=Math.ceil((mid+40)/10)*10}
   const yFor=v=>T+(yMax-v)/(yMax-yMin)*(H-T-B);
   const tickStart=Math.ceil(yMin/20)*20;
   for(let v=tickStart;v<=yMax;v+=20){const y=yFor(v);svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#d8e1de","stroke-width":"1"}));svg.appendChild(svgEl("text",{x:L-8,y:y+4,"text-anchor":"end",fill:"#667773","font-size":"11"},String(v)))}
   svg.appendChild(svgEl("text",{x:16,y:18,fill:"#667773","font-size":"11"},"mmHg"));
+
+  // JSH2025の家庭血圧降圧目標（一般的な目安）を太く濃い基準線で表示
+  [
+    {v:HOME_BP_TARGET_SBP,label:"収縮期 125"},
+    {v:HOME_BP_TARGET_DBP,label:"拡張期 75"}
+  ].forEach(t=>{
+    if(t.v<yMin||t.v>yMax)return;
+    const y=yFor(t.v);
+    svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#263a35","stroke-width":"3.8","stroke-linecap":"round",opacity:".92"}));
+    svg.appendChild(svgEl("text",{x:W-R-5,y:y-6,"text-anchor":"end",fill:"#263a35","font-size":"11","font-weight":"900"},t.label))
+  });
+
   const drawLine=(points,color,label,dash="")=>{let prev=null;points.forEach(p=>{if(p.value===null||p.value===undefined){prev=null;return}const x=p.x,y=yFor(Number(p.value));if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:x,y2:y,stroke:color,"stroke-width":"2.8","stroke-linecap":"round","stroke-dasharray":dash}));const c=svgEl("circle",{cx:x,cy:y,r:"4.2",fill:color,stroke:"#fff","stroke-width":"1.3"});c.appendChild(svgEl("title",{},`${p.date} ${p.part||""} ${label} ${Number(p.value).toFixed(0)} mmHg`));svg.appendChild(c);prev={x,y}})};
   if(selectedBpChartMode==="continuous"){
     const slots=[];records.forEach(r=>{slots.push({date:r.date,part:"朝",sbp:r.bpMorningSbp,dbp:r.bpMorningDbp});slots.push({date:r.date,part:"夜",sbp:r.bpEveningSbp,dbp:r.bpEveningDbp})});
@@ -3776,7 +3865,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:47,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:48,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
