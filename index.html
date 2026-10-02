@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v49</title>
+<title>生活習慣ケアノート v51</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -572,7 +572,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v49: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+/* v51: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
 .photo-backup-box{
   margin-top:14px;
   border:2px solid #8eb7ac;
@@ -594,7 +594,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v49: SMBG範囲別割合（CGM風の参考表示） */
+/* v51: SMBG範囲別割合（CGM風の参考表示） */
 .smbg-range-wrap{margin-top:14px}
 .smbg-range-grid{
   display:grid;
@@ -620,6 +620,17 @@ body.manual-open{overflow:hidden}
   .smbg-range-grid{grid-template-columns:1fr}
 }
 
+
+/* v51: ABSI z-score（年齢・性別標準化） */
+.absi-z-panel{display:none;margin-top:8px;border:1px solid #c8ddd7;border-radius:12px;background:#f8fbfa;padding:11px 12px}
+.absi-z-panel .grid2{margin-top:8px}
+.absi-z-result{margin-top:9px;border-radius:10px;padding:9px 10px;background:#eef5f3;border-left:4px solid #2f6f65;font-size:12px;line-height:1.7}
+.absi-z-result.high{background:#fff6e2;border-left-color:#c28a2e}
+.absi-z-result.very-high{background:#fff0ee;border-left-color:#b04a3c}
+.absi-z-result.low{background:#eef5fb;border-left-color:#4f7c9c}
+.absi-z-result.very-low{background:#e9f1fa;border-left-color:#365f86}
+.absi-z-score{font-size:19px;font-weight:900;color:#294f45}
+
 </style>
 </head>
 <body>
@@ -627,7 +638,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v49</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v51</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -1028,6 +1039,15 @@ body.manual-open{overflow:hidden}
       <div data-visit-field="waist"><label for="visitWaist">腹囲 (cm)</label><input type="number" id="visitWaist" inputmode="decimal" step="0.1" min="30" max="250"></div>
     </div>
     <div id="visitAbsiBox" data-visit-field="waist" class="privacy" style="margin-top:8px">ABSI：体重・腹囲と、設定画面の身長を入力すると自動計算します。</div>
+    <div id="visitAbsiZPanel" data-visit-field="waist" class="absi-z-panel">
+      <strong>年齢・性別で標準化したABSI z-score（任意）</strong>
+      <div class="note">年齢と性別を入力すると、NHANES 1999–2004の年齢・性別別ABSI基準値を用いてz-scoreを計算します。入力しない場合は、上のABSIの一般的な解釈のみを表示します。</div>
+      <div class="grid2">
+        <div><label for="visitAbsiAge">年齢（歳）</label><input type="number" id="visitAbsiAge" inputmode="numeric" min="18" max="120" step="1" placeholder="例：65"></div>
+        <div><label for="visitAbsiSex">性別（基準表）</label><select id="visitAbsiSex"><option value="">選択しない</option><option value="male">男性基準</option><option value="female">女性基準</option></select></div>
+      </div>
+      <div id="visitAbsiZResult" class="absi-z-result" style="display:none"></div>
+    </div>
 
     <div class="section-label" data-visit-section="treatment">治療内容</div>
     <div data-visit-field="medication"><label for="visitMedication">薬剤</label><textarea id="visitMedication" placeholder="薬剤名、変更内容など"></textarea></div>
@@ -2663,17 +2683,52 @@ function calculateABSI(weightKg,waistCm,heightCm){
   const bmi=w/(h*h);
   return wc/(Math.pow(bmi,2/3)*Math.sqrt(h))
 }
+const ABSI_NHANES_REFERENCE=[[18,0.07702,0.00378,0.07775,0.00408],[19,0.07711,0.00378,0.07765,0.00411],[20,0.07728,0.00377,0.07757,0.00414],[21,0.0775,0.00377,0.0775,0.00416],[22,0.07777,0.00377,0.07744,0.00419],[23,0.07804,0.00376,0.0774,0.00422],[24,0.07831,0.00376,0.07737,0.00424],[25,0.07858,0.00376,0.07735,0.00427],[26,0.07882,0.00375,0.07734,0.00429],[27,0.07904,0.00375,0.07735,0.00432],[28,0.07922,0.00374,0.07736,0.00435],[29,0.07938,0.00374,0.07739,0.00437],[30,0.07951,0.00374,0.07743,0.0044],[31,0.07963,0.00373,0.07747,0.00442],[32,0.07975,0.00373,0.07752,0.00445],[33,0.07988,0.00373,0.07759,0.00447],[34,0.08,0.00372,0.07766,0.0045],[35,0.08013,0.00372,0.07773,0.00452],[36,0.08027,0.00371,0.07782,0.00454],[37,0.08042,0.00371,0.0779,0.00457],[38,0.08057,0.00371,0.078,0.00459],[39,0.08072,0.0037,0.0781,0.00462],[40,0.08087,0.0037,0.0782,0.00464],[41,0.08102,0.0037,0.07831,0.00466],[42,0.08117,0.00369,0.07842,0.00469],[43,0.08132,0.00369,0.07854,0.00471],[44,0.08148,0.00368,0.07866,0.00473],[45,0.08165,0.00368,0.07879,0.00476],[46,0.08183,0.00368,0.07892,0.00478],[47,0.08201,0.00367,0.07905,0.0048],[48,0.08221,0.00367,0.07919,0.00483],[49,0.0824,0.00367,0.07933,0.00485],[50,0.0826,0.00366,0.07947,0.00487],[51,0.08279,0.00366,0.07962,0.00489],[52,0.08297,0.00365,0.07977,0.00492],[53,0.08315,0.00365,0.07992,0.00494],[54,0.08334,0.00365,0.08007,0.00496],[55,0.08352,0.00364,0.08023,0.00498],[56,0.08369,0.00364,0.08039,0.00501],[57,0.08386,0.00364,0.08055,0.00503],[58,0.08403,0.00363,0.08072,0.00505],[59,0.08419,0.00363,0.08088,0.00507],[60,0.08436,0.00362,0.08105,0.00509],[61,0.08454,0.00362,0.08122,0.00511],[62,0.08471,0.00362,0.08139,0.00514],[63,0.08489,0.00361,0.08156,0.00516],[64,0.08506,0.00361,0.08174,0.00518],[65,0.08522,0.0036,0.08191,0.0052],[66,0.08537,0.0036,0.08208,0.00522],[67,0.08551,0.0036,0.08226,0.00524],[68,0.08565,0.00359,0.08243,0.00526],[69,0.08578,0.00359,0.08261,0.00528],[70,0.08591,0.00359,0.08278,0.0053],[71,0.08604,0.00358,0.08296,0.00533],[72,0.08616,0.00358,0.08313,0.00535],[73,0.08629,0.00357,0.0833,0.00537],[74,0.08641,0.00357,0.08346,0.00539],[75,0.08653,0.00357,0.08363,0.00541],[76,0.08665,0.00356,0.0838,0.00543],[77,0.08675,0.00356,0.08396,0.00545],[78,0.08685,0.00355,0.08412,0.00547],[79,0.08695,0.00355,0.08428,0.00549],[80,0.08705,0.00355,0.08444,0.00551],[81,0.08714,0.00354,0.0846,0.00553],[82,0.08723,0.00354,0.08476,0.00555],[83,0.08732,0.00354,0.08492,0.00557],[84,0.08742,0.00353,0.08508,0.00559],[85,0.08811,0.00356,0.08533,0.00528]];
+function getABSIReference(age,sex){
+  const a=Math.round(Number(age));
+  if(!Number.isFinite(a)||a<18||!["male","female"].includes(sex))return null;
+  const refAge=Math.min(85,a),row=ABSI_NHANES_REFERENCE.find(r=>r[0]===refAge);
+  if(!row)return null;
+  return sex==="male"?{age:refAge,mean:row[1],sd:row[2],sexLabel:"男性"}:{age:refAge,mean:row[3],sd:row[4],sexLabel:"女性"}
+}
+function classifyABSIZ(z){
+  if(z<-.868)return {key:"very-low",label:"かなり低い領域"};
+  if(z<-.272)return {key:"low",label:"低い領域"};
+  if(z<.230)return {key:"average",label:"平均的な領域"};
+  if(z<=.798)return {key:"high",label:"高い領域"};
+  return {key:"very-high",label:"かなり高い領域"}
+}
+function updateVisitABSIZ(absi){
+  const panel=$("visitAbsiZPanel"),result=$("visitAbsiZResult");
+  if(!panel||!result)return;
+  if(absi===null||absi===undefined||!Number.isFinite(Number(absi))){panel.style.display="none";result.style.display="none";return}
+  panel.style.display="block";
+  const age=numOrNull($("visitAbsiAge").value),sex=$("visitAbsiSex").value;
+  if(!age||!sex){result.style.display="none";return}
+  if(age<18){result.style.display="block";result.className="absi-z-result";result.innerHTML="<strong>18歳未満はこのツールではz-score評価を行いません。</strong>";return}
+  const ref=getABSIReference(age,sex); if(!ref){result.style.display="none";return}
+  const z=(Number(absi)-ref.mean)/ref.sd,cat=classifyABSIZ(z),ageText=age>=85?"85歳以上":Math.round(age)+"歳";
+  result.style.display="block"; result.className="absi-z-result "+cat.key;
+  result.innerHTML='<div>ABSI z-score <span class="absi-z-score">'+(z>=0?"+":"")+z.toFixed(2)+'</span>　｜　<strong>'+cat.label+'</strong></div>'+
+    '<div style="margin-top:4px">'+ageText+'・'+ref.sexLabel+'のNHANES基準と比較した標準化値です。z=0が同年齢・同性の平均、正の値ほど平均より高く、負の値ほど低いことを示します。</div>'+
+    '<div class="note" style="margin-top:4px">区分はABSI z-scoreの5群区分（&lt;−0.868 / −0.868〜−0.272 / −0.272〜0.229 / 0.230〜0.798 / &gt;0.798）に基づく参考表示です。NHANES 1999–2004の米国集団を基準としており、日本人の診断基準ではありません。個々のリスク判定ではなく参考値として使用してください。</div>'
+}
 function updateVisitABSI(){
-  const box=$("visitAbsiBox");if(!box)return;
+  const box=$("visitAbsiBox"),panel=$("visitAbsiZPanel");if(!box)return;
   const w=numOrNull($("visitWeight").value),wc=numOrNull($("visitWaist").value),h=numOrNull(loadSettings().height);
-  if(!h){box.innerHTML="ABSI：<strong>身長が未設定です。</strong> 設定画面で身長を入力してください。";return}
-  if(!w||!wc){box.textContent="ABSI：体重・腹囲と、設定画面の身長を入力すると自動計算します。";return}
+  if(!h){box.innerHTML="ABSI：<strong>身長が未設定です。</strong> 設定画面で身長を入力してください。";if(panel)panel.style.display="none";return}
+  if(!w||!wc){box.textContent="ABSI：体重・腹囲と、設定画面の身長を入力すると自動計算します。";if(panel)panel.style.display="none";return}
   const bmi=w/((h/100)**2),absi=calculateABSI(w,wc,h);
-  box.innerHTML=`BMI ${bmi.toFixed(1)} kg/m²　｜　ABSI <strong>${absi.toFixed(4)}</strong><div class="note" style="margin-top:3px">ABSI = 腹囲(m) ÷ [BMI^(2/3) × 身長(m)^(1/2)]</div>`
+  const age=numOrNull($("visitAbsiAge")?.value),sex=$("visitAbsiSex")?.value||"",hasStandardization=!!(age&&sex&&age>=18);
+  box.innerHTML=hasStandardization
+    ?'<div>BMI '+bmi.toFixed(1)+' kg/m²　｜　ABSI <strong>'+absi.toFixed(4)+'</strong></div><div class="note" style="margin-top:4px">ABSI = 腹囲(m) ÷ [BMI^(2/3) × 身長(m)^(1/2)]</div>'
+    :'<div>BMI '+bmi.toFixed(1)+' kg/m²　｜　ABSI <strong>'+absi.toFixed(4)+'</strong></div><div class="note" style="margin-top:5px"><strong>解釈：</strong>ABSIは、同じBMI・身長に対して腹囲が相対的に大きいほど高くなる指標です。高いABSIは腹部肥満や死亡リスクとの関連が報告されています。</div><div class="note" style="margin-top:4px"><strong>注意：</strong>ABSIは年齢・性別で基準値が異なるため、raw ABSIに一律の「正常／高値」のカットオフはありません。このツールでは診断区分を付けず、経時変化をみる参考値として表示します。</div><div class="note" style="margin-top:4px">ABSI = 腹囲(m) ÷ [BMI^(2/3) × 身長(m)^(1/2)]</div>';
+  updateVisitABSIZ(absi)
 }
 function visitFormToRecord(){
   const r={date:$("visitDate").value,medication:$("visitMedication").value.trim(),diet:$("visitDiet").value.trim(),
     exercise:$("visitExercise").value.trim(),protein:$("visitProtein").value.trim(),note:$("visitNote").value.trim(),
+    absiAge:numOrNull($("visitAbsiAge").value),absiSex:$("visitAbsiSex").value,
     updatedAt:new Date().toISOString()};
   const map={visitWeight:"weight",visitWaist:"waist",visitSBP:"sbp",visitDBP:"dbp",visitGlucose:"glucose",visitHbA1c:"hba1c",visitGA:"ga",visitHb:"hb",
     visitTC:"tc",visitTG:"tg",visitHDL:"hdl",visitLDL:"ldl",visitAST:"ast",visitALT:"alt",visitGGT:"ggt",
@@ -2688,6 +2743,8 @@ function setVisitForm(r){
     visitTC:"tc",visitTG:"tg",visitHDL:"hdl",visitLDL:"ldl",visitAST:"ast",visitALT:"alt",visitGGT:"ggt",
     visitUA:"ua",visitCr:"cr",visitEGFR:"egfr"};
   Object.entries(map).forEach(([id,key])=>$(id).value=r?.[key]??"");
+  $("visitAbsiAge").value=r?.absiAge??"";
+  $("visitAbsiSex").value=r?.absiSex??"";
   updateVisitABSI()
 }
 async function loadVisit(date){
@@ -3733,10 +3790,13 @@ async function renderVisits(){
   if(!records.length){box.innerHTML='<div class="empty">外来記録はまだありません</div>';return}
   records.forEach(r=>{
     const absi=calculateABSI(r.weight,r.waist,loadSettings().height);
+    const absiRef=absi!==null&&r.absiAge&&r.absiSex?getABSIReference(r.absiAge,r.absiSex):null;
+    const absiZ=absiRef?(absi-absiRef.mean)/absiRef.sd:null;
     const labs=[
       labChip("体重",r.weight!==null&&r.weight!==undefined?Number(r.weight).toFixed(1):null,"kg"),
       labChip("腹囲",r.waist!==null&&r.waist!==undefined?Number(r.waist).toFixed(1):null,"cm"),
       labChip("ABSI",absi!==null?absi.toFixed(4):null,""),
+      labChip("ABSI z",absiZ!==null?(absiZ>=0?"+":"")+absiZ.toFixed(2):null,""),
       labChip("HbA1c",r.hba1c!==null&&r.hba1c!==undefined?Number(r.hba1c).toFixed(1):null,"%"),
       labChip("GA",r.ga!==null&&r.ga!==undefined?Number(r.ga).toFixed(1):null,"%"),
       labChip("血圧",(r.sbp!==null||r.dbp!==null)?`${r.sbp??"—"}/${r.dbp??"—"}`:null,"mmHg"),labChip("血糖",r.glucose,"mg/dL"),
@@ -3896,7 +3956,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:49,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:51,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
@@ -4314,13 +4374,14 @@ $("deleteAllPhotosBtn").onclick=async()=>{if(confirm("食事写真をすべて�
   $(id).addEventListener("blur",()=>scheduleDailyAutoSave(100));
 });
 // 外来記録も同様に自動保存
-["visitWeight","visitWaist","visitMedication","visitDiet","visitExercise","visitSBP","visitDBP","visitGlucose","visitHbA1c","visitGA","visitHb",
+["visitWeight","visitWaist","visitAbsiAge","visitAbsiSex","visitMedication","visitDiet","visitExercise","visitSBP","visitDBP","visitGlucose","visitHbA1c","visitGA","visitHb",
  "visitTC","visitTG","visitHDL","visitLDL","visitAST","visitALT","visitGGT","visitUA","visitCr","visitEGFR","visitProtein","visitNote"].forEach(id=>{
   $(id).addEventListener("input",()=>scheduleVisitAutoSave(700));
   $(id).addEventListener("change",()=>scheduleVisitAutoSave(100));
   $(id).addEventListener("blur",()=>scheduleVisitAutoSave(100));
 });
-["visitWeight","visitWaist"].forEach(id=>$(id).addEventListener("input",updateVisitABSI));
+["visitWeight","visitWaist","visitAbsiAge"].forEach(id=>$(id).addEventListener("input",updateVisitABSI));
+$("visitAbsiSex").addEventListener("change",updateVisitABSI);
 
 $("saveEyeBtn").onclick=saveEyeCurrent;
 $("clearEyeFormBtn").onclick=()=>{setEyeForm({date:todayISO()});setSaveStatus("eyeStatus","入力欄をクリアしました。","")};
