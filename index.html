@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v51</title>
+<title>生活習慣ケアノート v53</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -572,7 +572,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v51: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+/* v53: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
 .photo-backup-box{
   margin-top:14px;
   border:2px solid #8eb7ac;
@@ -594,7 +594,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v51: SMBG範囲別割合（CGM風の参考表示） */
+/* v53: SMBG範囲別割合（CGM風の参考表示） */
 .smbg-range-wrap{margin-top:14px}
 .smbg-range-grid{
   display:grid;
@@ -621,7 +621,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v51: ABSI z-score（年齢・性別標準化） */
+/* v53: ABSI z-score（年齢・性別標準化） */
 .absi-z-panel{display:none;margin-top:8px;border:1px solid #c8ddd7;border-radius:12px;background:#f8fbfa;padding:11px 12px}
 .absi-z-panel .grid2{margin-top:8px}
 .absi-z-result{margin-top:9px;border-radius:10px;padding:9px 10px;background:#eef5f3;border-left:4px solid #2f6f65;font-size:12px;line-height:1.7}
@@ -638,7 +638,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v51</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v53</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -2710,7 +2710,8 @@ function updateVisitABSIZ(absi){
   const z=(Number(absi)-ref.mean)/ref.sd,cat=classifyABSIZ(z),ageText=age>=85?"85歳以上":Math.round(age)+"歳";
   result.style.display="block"; result.className="absi-z-result "+cat.key;
   result.innerHTML='<div>ABSI z-score <span class="absi-z-score">'+(z>=0?"+":"")+z.toFixed(2)+'</span>　｜　<strong>'+cat.label+'</strong></div>'+
-    '<div style="margin-top:4px">'+ageText+'・'+ref.sexLabel+'のNHANES基準と比較した標準化値です。z=0が同年齢・同性の平均、正の値ほど平均より高く、負の値ほど低いことを示します。</div>'+
+    '<div style="margin-top:4px">'+ageText+'・'+ref.sexLabel+'のNHANES基準と比較した標準化値です。z=0が同年齢・同性の平均、正の値ほど平均より高く、負の値ほど低いことを示します。高いz-scoreは、同年齢・同性の集団の中でも腹囲が体格に対して相対的に大きいことを意味します。</div>'+
+    '<div class="note" style="margin-top:4px"><strong>リスクの見方：</strong>ABSIが高い集団ほど、高血圧、2型糖尿病、心血管疾患、全死亡リスクが高いことが報告されています。ただし、このz-scoreから個人の発症確率を直接計算することはできません。</div>'+
     '<div class="note" style="margin-top:4px">区分はABSI z-scoreの5群区分（&lt;−0.868 / −0.868〜−0.272 / −0.272〜0.229 / 0.230〜0.798 / &gt;0.798）に基づく参考表示です。NHANES 1999–2004の米国集団を基準としており、日本人の診断基準ではありません。個々のリスク判定ではなく参考値として使用してください。</div>'
 }
 function updateVisitABSI(){
@@ -2720,9 +2721,10 @@ function updateVisitABSI(){
   if(!w||!wc){box.textContent="ABSI：体重・腹囲と、設定画面の身長を入力すると自動計算します。";if(panel)panel.style.display="none";return}
   const bmi=w/((h/100)**2),absi=calculateABSI(w,wc,h);
   const age=numOrNull($("visitAbsiAge")?.value),sex=$("visitAbsiSex")?.value||"",hasStandardization=!!(age&&sex&&age>=18);
+  const absiExplanation='<div class="note" style="margin-top:5px"><strong>ABSIとは：</strong>A Body Shape Index の略で、身長と体重（BMI）に対して腹囲がどの程度大きいかをみる体型指標です。BMIだけでは分かりにくい体型の違いを、腹囲を加えて補助的に評価します。</div><div class="note" style="margin-top:4px"><strong>ABSIが高いと：</strong>同じBMI・身長の人と比べて、腹囲が相対的に大きいことを示します。研究では、高いABSIは高血圧、2型糖尿病、心血管疾患、全死亡リスクが高いことと関連しています。ただし、ABSIだけで病気を診断したり、個人の発症確率を決めたりするものではありません。</div>';
   box.innerHTML=hasStandardization
-    ?'<div>BMI '+bmi.toFixed(1)+' kg/m²　｜　ABSI <strong>'+absi.toFixed(4)+'</strong></div><div class="note" style="margin-top:4px">ABSI = 腹囲(m) ÷ [BMI^(2/3) × 身長(m)^(1/2)]</div>'
-    :'<div>BMI '+bmi.toFixed(1)+' kg/m²　｜　ABSI <strong>'+absi.toFixed(4)+'</strong></div><div class="note" style="margin-top:5px"><strong>解釈：</strong>ABSIは、同じBMI・身長に対して腹囲が相対的に大きいほど高くなる指標です。高いABSIは腹部肥満や死亡リスクとの関連が報告されています。</div><div class="note" style="margin-top:4px"><strong>注意：</strong>ABSIは年齢・性別で基準値が異なるため、raw ABSIに一律の「正常／高値」のカットオフはありません。このツールでは診断区分を付けず、経時変化をみる参考値として表示します。</div><div class="note" style="margin-top:4px">ABSI = 腹囲(m) ÷ [BMI^(2/3) × 身長(m)^(1/2)]</div>';
+    ?'<div>BMI '+bmi.toFixed(1)+' kg/m²　｜　ABSI <strong>'+absi.toFixed(4)+'</strong></div>'+absiExplanation+'<div class="note" style="margin-top:4px">ABSI = 腹囲(m) ÷ [BMI^(2/3) × 身長(m)^(1/2)]</div>'
+    :'<div>BMI '+bmi.toFixed(1)+' kg/m²　｜　ABSI <strong>'+absi.toFixed(4)+'</strong></div>'+absiExplanation+'<div class="note" style="margin-top:5px"><strong>解釈：</strong>値が高いほど、体格に対して腹囲が相対的に大きいことを示します。年齢・性別を入力しない場合は、raw ABSIを経時変化を見る参考値として使用します。</div><div class="note" style="margin-top:4px"><strong>注意：</strong>ABSIは年齢・性別で基準値が異なるため、raw ABSIに一律の「正常／高値」のカットオフはありません。このツールでは診断区分を付けず、経時変化をみる参考値として表示します。</div><div class="note" style="margin-top:4px">ABSI = 腹囲(m) ÷ [BMI^(2/3) × 身長(m)^(1/2)]</div>';
   updateVisitABSIZ(absi)
 }
 function visitFormToRecord(){
@@ -3956,7 +3958,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:51,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:53,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
