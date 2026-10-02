@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v48</title>
+<title>生活習慣ケアノート v49</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -572,7 +572,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v48: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+/* v49: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
 .photo-backup-box{
   margin-top:14px;
   border:2px solid #8eb7ac;
@@ -594,7 +594,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v48: SMBG範囲別割合（CGM風の参考表示） */
+/* v49: SMBG範囲別割合（CGM風の参考表示） */
 .smbg-range-wrap{margin-top:14px}
 .smbg-range-grid{
   display:grid;
@@ -627,7 +627,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v48</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v49</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -844,7 +844,7 @@ body.manual-open{overflow:hidden}
       </div>
     </div>
   </details>
-  <div class="privacy">この試作版は外部サーバーへ体重・食事・食事写真・外来検査値を送信しません。記録はこの端末・このブラウザ内に保存します。</div>
+  <div class="privacy">本ツールは外部サーバーへ体重・食事・食事写真・外来検査値を送信しません。記録はこの端末・このブラウザ内に保存します。</div>
 </section>
 
 <section id="view-chart" class="view">
@@ -901,12 +901,14 @@ body.manual-open{overflow:hidden}
 
     <div class="chart-wrap"><svg id="smbgChart" viewBox="0 0 720 410" role="img" aria-label="血糖自己測定推移グラフ"></svg></div>
     <div class="legend" id="smbgRangeLegend" style="margin-top:8px">
-      <span><i style="background:#fdeaea"></i>70未満</span>
+      <span><i style="background:#f3b4b4"></i>54未満</span>
+      <span><i style="background:#fdeaea"></i>54〜69</span>
       <span><i style="background:#e9f7ee"></i>70〜180</span>
-      <span><i style="background:#fff7d6"></i>181以上</span>
+      <span><i style="background:#fff7d6"></i>181〜249</span>
+      <span><i style="background:#efd77d"></i>250以上</span>
     </div>
     <div class="smbg-series-legend" id="smbgSeriesLegend"></div>
-    <div class="note" style="margin-top:8px">背景色は、70 mg/dL未満を薄い赤、70〜180 mg/dLを薄い緑、181 mg/dL以上を薄い黄色で表示します。</div>
+    <div class="note" style="margin-top:8px">背景色は、54 mg/dL未満を濃いめの赤、54〜69 mg/dLを薄い赤、70〜180 mg/dLを薄い緑、181〜249 mg/dLを薄い黄色、250 mg/dL以上を濃いめの黄色で表示します。</div>
 
     <div class="smbg-average-wrap">
       <div class="section-label" style="margin-top:0">表示期間内の平均血糖</div>
@@ -982,8 +984,10 @@ body.manual-open{overflow:hidden}
       <div class="note">ここで選んだ項目はこの端末に保存され、次回以降も同じ項目だけ表示します。過去に入力した非表示項目のデータは削除されません。</div>
       <div class="field-picker-grid">
         <label class="field-picker-option"><input type="checkbox" class="visit-perm-option" value="weight">体重</label>
+        <label class="field-picker-option"><input type="checkbox" class="visit-perm-option" value="waist">腹囲</label>
         <label class="field-picker-option"><input type="checkbox" class="visit-perm-option" value="bp">血圧</label>
         <label class="field-picker-option"><input type="checkbox" class="visit-perm-option" value="hba1c">HbA1c</label>
+        <label class="field-picker-option"><input type="checkbox" class="visit-perm-option" value="ga">グリコアルブミン</label>
         <label class="field-picker-option"><input type="checkbox" class="visit-perm-option" value="medication">薬剤</label>
         <label class="field-picker-option"><input type="checkbox" class="visit-perm-option" value="diet">食事</label>
         <label class="field-picker-option"><input type="checkbox" class="visit-perm-option" value="exercise">運動</label>
@@ -1018,10 +1022,12 @@ body.manual-open{overflow:hidden}
       </div>
     </div>
 
-    <div class="grid2" style="margin-top:12px">
+    <div class="grid3" style="margin-top:12px">
       <div><label for="visitDate">受診日</label><input type="date" id="visitDate"></div>
       <div data-visit-field="weight"><label for="visitWeight">体重 (kg)</label><input type="number" id="visitWeight" inputmode="decimal" step="0.1" min="20" max="400"></div>
+      <div data-visit-field="waist"><label for="visitWaist">腹囲 (cm)</label><input type="number" id="visitWaist" inputmode="decimal" step="0.1" min="30" max="250"></div>
     </div>
+    <div id="visitAbsiBox" data-visit-field="waist" class="privacy" style="margin-top:8px">ABSI：体重・腹囲と、設定画面の身長を入力すると自動計算します。</div>
 
     <div class="section-label" data-visit-section="treatment">治療内容</div>
     <div data-visit-field="medication"><label for="visitMedication">薬剤</label><textarea id="visitMedication" placeholder="薬剤名、変更内容など"></textarea></div>
@@ -1036,8 +1042,9 @@ body.manual-open{overflow:hidden}
       <div data-visit-field="bp"><label for="visitDBP">拡張期血圧 (mmHg)</label><input type="number" id="visitDBP" inputmode="numeric"></div>
       <div data-visit-field="glucose"><label for="visitGlucose">血糖 (mg/dL)</label><input type="number" id="visitGlucose" inputmode="decimal" step="0.1"></div>
     </div>
-    <div class="grid2">
+    <div class="grid3">
       <div data-visit-field="hba1c"><label for="visitHbA1c">HbA1c (%)</label><input type="number" id="visitHbA1c" inputmode="decimal" step="0.1" min="3" max="25"></div>
+      <div data-visit-field="ga"><label for="visitGA">グリコアルブミン (%)</label><input type="number" id="visitGA" inputmode="decimal" step="0.1" min="5" max="80"></div>
       <div data-visit-field="hb"><label for="visitHb">血色素量 Hb (g/dL)</label><input type="number" id="visitHb" inputmode="decimal" step="0.1"></div>
     </div>
 
@@ -1096,9 +1103,11 @@ body.manual-open{overflow:hidden}
         <h3>HbA1c</h3>
         <div class="chart-wrap"><svg id="visitHbA1cChart" viewBox="0 0 720 330"></svg></div>
         <div class="hba1c-zone-legend">
-          <span><i style="background:#eaf4ff"></i>7.0%未満</span>
+          <span><i style="background:#c9e2f7"></i>6.0%未満</span>
+          <span><i style="background:#eaf4ff"></i>6.0〜7.0%未満</span>
           <span><i style="background:#fff6d8"></i>7.0〜8.0%未満</span>
-          <span><i style="background:#fdeaea"></i>8.0%以上</span>
+          <span><i style="background:#fdeaea"></i>8.0〜10.0%未満</span>
+          <span><i style="background:#f2bcbc"></i>10.0%以上</span>
         </div>
       </div>
     </div>
@@ -1111,12 +1120,31 @@ body.manual-open{overflow:hidden}
         <span><i style="background:#765a98;height:0;border-top:3px dashed #765a98"></i>HbA1c（右軸・%）</span>
       </div>
       <div class="hba1c-zone-legend">
-        <span><i style="background:#eaf4ff"></i>HbA1c 7.0%未満</span>
+        <span><i style="background:#c9e2f7"></i>HbA1c 6.0%未満</span>
+        <span><i style="background:#eaf4ff"></i>6.0〜7.0%未満</span>
         <span><i style="background:#fff6d8"></i>7.0〜8.0%未満</span>
-        <span><i style="background:#fdeaea"></i>8.0%以上</span>
+        <span><i style="background:#fdeaea"></i>8.0〜10.0%未満</span>
+        <span><i style="background:#f2bcbc"></i>10.0%以上</span>
       </div>
-      <div class="combined-chart-note">左軸は体重、右軸はHbA1cです。背景はHbA1cの右軸に対応し、7.0%未満を薄い青、7.0〜8.0%未満を薄い黄色、8.0%以上を薄い赤で表示します。2本の線は左右で別スケールなので、線の傾きそのものを直接比較するのではなく、体重とHbA1cが同じ時期にどのように変化しているかを見るためのグラフです。</div>
+      <div class="combined-chart-note">左軸は体重、右軸はHbA1cです。背景はHbA1cの右軸に対応し、6.0%未満を濃いめの青、6.0〜7.0%未満を薄い青、7.0〜8.0%未満を薄い黄色、8.0〜10.0%未満を薄い赤、10.0%以上を濃いめの赤で表示します。2本の線は左右で別スケールなので、線の傾きそのものを直接比較するのではなく、体重とHbA1cが同じ時期にどのように変化しているかを見るためのグラフです。</div>
     </div>
+  </div>
+
+  <div class="card" id="gaChartsCard" style="display:none">
+    <h2>グリコアルブミンの経過</h2>
+    <div class="note" style="margin-top:-5px">外来記録でグリコアルブミンを表示項目として選択した場合に表示します。</div>
+    <h3>グリコアルブミン（GA）</h3>
+    <div class="chart-wrap"><svg id="visitGAChart" viewBox="0 0 720 330" role="img" aria-label="グリコアルブミン推移グラフ"></svg></div>
+    <h3>GAから換算した推定HbA1c</h3>
+    <div class="chart-wrap"><svg id="visitGAEstimatedHbA1cChart" viewBox="0 0 720 330" role="img" aria-label="グリコアルブミンから換算した推定HbA1cグラフ"></svg></div>
+    <div class="hba1c-zone-legend">
+      <span><i style="background:#c9e2f7"></i>6.0%未満</span>
+      <span><i style="background:#eaf4ff"></i>6.0〜7.0%未満</span>
+      <span><i style="background:#fff6d8"></i>7.0〜8.0%未満</span>
+      <span><i style="background:#fdeaea"></i>8.0〜10.0%未満</span>
+      <span><i style="background:#f2bcbc"></i>10.0%以上</span>
+    </div>
+    <div class="note" style="margin-top:8px">推定HbA1cは <strong>HbA1c = 0.216 × GA + 2.978</strong> で換算した参考値です（Kogaら, Endocr J 2014）。実測HbA1cの代わりではなく、GAとHbA1cの関係が変化する病態ではずれることがあります。</div>
   </div>
 
   <div class="card egfr-slope-card" id="egfrSlopeCard">
@@ -1668,8 +1696,8 @@ body.manual-open{overflow:hidden}
       <div><button id="openDeviceManualBtn" type="button">端末利用マニュアルを開く</button></div>
       <div><button id="openAppManualBtn" type="button" class="secondary">生活習慣ケアノート利用マニュアルを開く</button></div>
     </div>
-    <div class="note" style="margin-top:8px">端末利用マニュアル：iPhone / iPad のSafari・Chrome、AndroidのChromeでの開き方、ホーム画面への追加、バックアップ・更新時の注意など。</div>
-    <div class="note" style="margin-top:4px">ツール利用マニュアル：毎日の入力、食事写真、体重・血糖・血圧グラフ、外来、eGFRスロープ、眼科、履歴、バックアップなどを詳しく説明します。</div>
+    <div class="note" style="margin-top:8px">端末利用マニュアル：iPhone / iPad のSafari・Chrome、AndroidのChrome、MacのSafari、Windows / MacのChromeでの利用、ホーム画面・Dock・Webアプリへの追加、バックアップ・更新時の注意など。</div>
+    <div class="note" style="margin-top:4px">ツール利用マニュアル：最初に設定、画面構成と基本操作を説明した後、下部タブの順に「記録 → グラフ → 外来 → 眼科 → 基礎知識 → レビュー → 履歴」を図入りで詳しく説明します。</div>
   </div>
 
   <div class="card">
@@ -1777,51 +1805,8 @@ body.manual-open{overflow:hidden}
   </div>
 
 
-  <div class="card">
-    <h2>試作用ツール</h2>
-    <div class="row">
-      <button id="demoBtn" class="secondary">日常30日＋外来6回のサンプルを作成</button>
-      <button id="clearBtn" class="danger">全データを削除</button>
-    </div>
-    <div class="note" style="margin-top:8px">※サンプルデータはグラフや履歴の動作確認用です。</div>
-  </div>
 
-  <div class="card">
-    <h2>この試作版について</h2>
-    <ul class="note">
-      <li>外部ライブラリ・広告・アクセス解析は使用していません。</li>
-      <li>設定画面のバックアップ欄の下に、著作権者・所属・CC BY-NC-ND 4.0のライセンス表示を掲載しています。</li><li>設定画面の一番上に「端末利用マニュアル」と「生活習慣ケアノート利用マニュアル」を配置しています。端末利用マニュアルはiPhone / iPadのSafari・Chrome、AndroidのChrome、MacのSafari、Windows / MacのChromeに対応します。生活習慣ケアノート利用マニュアルは、最初に下部の「設定」タブから基本設定を行う手順を案内し、その後は操作画面例付きで説明します。どちらもPDFを直接開かずページ画像を縦に並べて読み、マニュアル画面の「ツールに戻る」ボタンで戻れます。</li>
-      <li>日常記録と外来受診記録を端末内に自動保存します。保存ボタンは補助用です。</li>
-      <li>外来受診時には、薬剤変更・治療開始/中止・体調変化・検査の補足などを記録できるフリーコメント欄を常時表示します。</li>
-      <li>日常記録の自宅測定は体重を常時表示し、体脂肪率・筋肉量・血糖自己測定・血圧は患者ごとに「普段表示」または「今回だけ追加」を選べます。血圧は朝・夜それぞれ収縮期／拡張期を入力します。</li>
-      <li>「排便あり」は「今回だけ項目を追加」専用です。選択して追加した時点で排便ありとして記録し、入力画面にはチェック欄を出さず「排便あり」の文字だけを表示します。排便があった日は自宅体重グラフに「＊」を表示します。</li>
-      <li>血糖自己測定グラフは「同じ時間帯を線で結ぶ」を初期設定とし、「測定順に点を結ぶ」にも切り替えられます。背景は70未満・70〜180・181以上の3領域を色分けします。</li>
-      <li>血糖自己測定グラフの下に、選択中の表示期間について、朝食前・朝食後・昼食前・昼食後・夕食前・夕食後・眠前それぞれの平均血糖値と測定回数を表示します。</li><li>血糖自己測定では、表示期間内の測定値についてTBR（70未満）・TIR（70〜180）・TAR（180超）の測定回数割合を参考値として表示します。CGMの時間割合とは異なります。</li>
-      <li>自宅血圧グラフは、収縮期・拡張期を朝→夜→翌朝の順に結ぶ表示を初期設定とし、朝・夜を別々の線で表示する方式にも切り替えられます。表示期間内の朝・夜それぞれの収縮期・拡張期平均も表示します。</li>
-      <li>眼科受診専用画面を追加し、受診日、次回予定、矯正視力、眼圧、白内障、糖尿病網膜症・黄斑症とその変化、診察メモを記録できます。</li>
-      <li>下部メニューは8項目を横スクロールせず、上段4項目・下段4項目の2段で表示します。高齢の方にも見やすいよう文字とタップ領域を大きめにしています。</li>
-      <li>朝食・昼食・夕食・間食は、文字に加えて1食最大6枚の写真を端末内に圧縮保存できます。写真保存期間は90日・180日・365日・削除しない、から選択できます。</li>
-      <li>食事写真は容量の大きい別データとして保存します。通常の完全バックアップには含めませんが、「完全バックアップ（写真を含む）」では食事写真もまとめて保存できます。</li>
-      <li>過去30日の食事写真を一覧表示し、AIを使わずに「良い食事の例」「改善を考える食事の例」を各1食選択できます。</li>
-      <li>完全バックアップの最終実施日を記録し、30日以上経過すると警告を表示します。</li>
-      <li>「基礎知識」は糖尿病・肥満症・脂質異常症・MASH・睡眠時無呼吸症候群に分けて表示しています。肥満症の薬物療法・外科治療は患者向けの一般的な説明のみとし、医療者向け治療選択アルゴリズムは掲載していません。</li>
-      <li>糖尿病の基礎知識として、合併症、年1回以上の眼科チェック、HbA1cの意味、成人・高齢者のHbA1c目標に加え、糖尿病の食事療法・運動療法を日本糖尿病学会の資料に基づき患者向けに要約しています。</li>
-      <li>脂質異常症、MASH（代謝機能障害関連脂肪肝炎）、閉塞性睡眠時無呼吸症候群（OSAS）の基礎知識を、それぞれ独立した患者向け項目として追加しています。</li>
-      <li>脂質異常症では、LDL-C高値、TG高値、両方高値の3パターンに分けた食事アドバイスを掲載しています。</li>
-      <li>自宅体重の減少率は朝・夜を混ぜず、それぞれの最初の記録と比較します。直近体重は「最新の体重」または「最新測定日を含む直近7日中央値」を選択できます。外来体重は減少率計算に使いません。</li>
-      <li>「BMI 25以上の方用：減量メダル」は折りたたみ表示です。開始時BMI 25以上の場合のみ同時間帯の体重減少1%ごとにメダルを獲得し、BMI 20未満で注意、18.5未満で強い警告と新規メダル停止を行います。開始時BMI 25未満の方は減量メダルの対象外です。</li>
-      <li>減量メダルとは独立して、すべての方に体重減少の安全アラートを適用します。現在BMI 20未満かつ開始時から3%以上減少で注意、BMI 18.5未満では減少率にかかわらず強い警告を表示します。</li>
-      <li>自宅体重は14日、30日、3か月、1年、全期間を表示します。</li>
-      <li>体重グラフは「朝・夜を別々の線」と「朝→夜→翌朝を1本で連続」の2方式から選べます。</li>
-      <li>外来では患者ごとに普段表示する記録項目を選択できます。初期設定は体重・血圧・HbA1cです。今回だけ項目追加／すべて表示も可能です。</li>
-      <li>外来では体重とHbA1cの経過を、別々のグラフまたは左軸＝体重・右軸＝HbA1cの同一グラフから選んで表示できます。</li>
-      <li>外来経過グラフには、眼科受診記録から最終眼科受診日と次回受診予定を文字情報で表示します。</li>
-      <li>外来記録でeGFRを表示項目として選ぶと、全eGFR記録から年間スロープ・月間スロープ・R²と判定目安を表示します。3点未満または観察期間6か月未満では「参考値」とします。</li>
-      <li>下部メニューは8項目を横スクロールせず、上段4項目・下段4項目の2段で表示します。高齢の方にも見やすいよう文字とタップ領域を大きめにしています。</li>
-      <li>外来HbA1cグラフは、別表示・体重との同一表示のどちらでも、7.0%未満＝薄い青、7.0〜8.0%未満＝薄い黄色、8.0%以上＝薄い赤の背景で表示します。</li>
-      <li>保存はIndexedDBを優先し、利用できない環境ではlocalStorageへ切り替えます。</li>
-    </ul>
-  </div>
+
 </section>
 
 <section id="view-eye" class="view">
@@ -1921,7 +1906,7 @@ const photoObjectUrls=new Map();
 const VISIT_FIELD_SETTINGS_KEY="weightControlVisitFieldSettingsV10";
 const DEFAULT_VISIT_FIELDS=["weight","bp","hba1c"];
 const VISIT_FIELD_LABELS={
-  weight:"体重",bp:"血圧",hba1c:"HbA1c",medication:"薬剤",diet:"食事",exercise:"運動",
+  weight:"体重",waist:"腹囲",bp:"血圧",hba1c:"HbA1c",ga:"グリコアルブミン",medication:"薬剤",diet:"食事",exercise:"運動",
   glucose:"血糖",hb:"血色素量 Hb",tc:"総コレステロール",tg:"中性脂肪",hdl:"HDL-C",ldl:"LDL-C",
   ast:"AST",alt:"ALT",ggt:"γ-GTP",ua:"尿酸",cr:"クレアチニン",egfr:"eGFR",protein:"尿蛋白",note:"フリーコメント"
 };
@@ -1971,7 +1956,7 @@ const hasMeaningfulDailyData=r=>{
 };
 const hasMeaningfulVisitData=r=>{
   if(!r)return false;
-  const numericKeys=["weight","sbp","dbp","glucose","hba1c","hb","tc","tg","hdl","ldl","ast","alt","ggt","ua","cr","egfr"];
+  const numericKeys=["weight","waist","sbp","dbp","glucose","hba1c","ga","hb","tc","tg","hdl","ldl","ast","alt","ggt","ua","cr","egfr"];
   return numericKeys.some(k=>r[k]!==null&&r[k]!==undefined) ||
          [r.medication,r.diet,r.exercise,r.protein,r.note].some(v=>String(v||"").trim()!=="");
 };
@@ -2622,7 +2607,7 @@ function applyVisitFieldVisibility(){
   });
   const sectionMap={
     treatment:["medication","diet","exercise"],
-    metabolic:["bp","glucose","hba1c","hb"],
+    metabolic:["bp","glucose","hba1c","ga","hb"],
     lipid:["tc","tg","hdl","ldl"],
     organ:["ast","alt","ggt","ua","cr","egfr","protein"],
     note:["note"]
@@ -2639,6 +2624,12 @@ function applyVisitFieldVisibility(){
     const showEgfr=visible.has("egfr");
     egfrCard.style.display=showEgfr?"block":"none";
     if(showEgfr)drawEgfrSlope()
+  }
+  const gaCard=$("gaChartsCard");
+  if(gaCard){
+    const showGa=visible.has("ga");
+    gaCard.style.display=showGa?"block":"none";
+    if(showGa)drawGaCharts()
   }
 }
 function syncPermanentVisitFieldCheckboxes(){
@@ -2665,12 +2656,26 @@ function resetVisitTemporaryDisplay(){
 }
 
 /* 外来記録 */
-const visitIds=["visitWeight","visitSBP","visitDBP","visitGlucose","visitHbA1c","visitHb","visitTC","visitTG","visitHDL","visitLDL","visitAST","visitALT","visitGGT","visitUA","visitCr","visitEGFR"];
+const visitIds=["visitWeight","visitWaist","visitSBP","visitDBP","visitGlucose","visitHbA1c","visitGA","visitHb","visitTC","visitTG","visitHDL","visitLDL","visitAST","visitALT","visitGGT","visitUA","visitCr","visitEGFR"];
+function calculateABSI(weightKg,waistCm,heightCm){
+  const w=Number(weightKg),wc=Number(waistCm)/100,h=Number(heightCm)/100;
+  if(!Number.isFinite(w)||!Number.isFinite(wc)||!Number.isFinite(h)||w<=0||wc<=0||h<=0)return null;
+  const bmi=w/(h*h);
+  return wc/(Math.pow(bmi,2/3)*Math.sqrt(h))
+}
+function updateVisitABSI(){
+  const box=$("visitAbsiBox");if(!box)return;
+  const w=numOrNull($("visitWeight").value),wc=numOrNull($("visitWaist").value),h=numOrNull(loadSettings().height);
+  if(!h){box.innerHTML="ABSI：<strong>身長が未設定です。</strong> 設定画面で身長を入力してください。";return}
+  if(!w||!wc){box.textContent="ABSI：体重・腹囲と、設定画面の身長を入力すると自動計算します。";return}
+  const bmi=w/((h/100)**2),absi=calculateABSI(w,wc,h);
+  box.innerHTML=`BMI ${bmi.toFixed(1)} kg/m²　｜　ABSI <strong>${absi.toFixed(4)}</strong><div class="note" style="margin-top:3px">ABSI = 腹囲(m) ÷ [BMI^(2/3) × 身長(m)^(1/2)]</div>`
+}
 function visitFormToRecord(){
   const r={date:$("visitDate").value,medication:$("visitMedication").value.trim(),diet:$("visitDiet").value.trim(),
     exercise:$("visitExercise").value.trim(),protein:$("visitProtein").value.trim(),note:$("visitNote").value.trim(),
     updatedAt:new Date().toISOString()};
-  const map={visitWeight:"weight",visitSBP:"sbp",visitDBP:"dbp",visitGlucose:"glucose",visitHbA1c:"hba1c",visitHb:"hb",
+  const map={visitWeight:"weight",visitWaist:"waist",visitSBP:"sbp",visitDBP:"dbp",visitGlucose:"glucose",visitHbA1c:"hba1c",visitGA:"ga",visitHb:"hb",
     visitTC:"tc",visitTG:"tg",visitHDL:"hdl",visitLDL:"ldl",visitAST:"ast",visitALT:"alt",visitGGT:"ggt",
     visitUA:"ua",visitCr:"cr",visitEGFR:"egfr"};
   Object.entries(map).forEach(([id,key])=>r[key]=numOrNull($(id).value));return r
@@ -2679,10 +2684,11 @@ function setVisitForm(r){
   $("visitDate").value=r?.date||todayISO();$("visitMedication").value=r?.medication??"";
   $("visitDiet").value=r?.diet??"";$("visitExercise").value=r?.exercise??"";$("visitProtein").value=r?.protein??"";
   $("visitNote").value=r?.note??"";
-  const map={visitWeight:"weight",visitSBP:"sbp",visitDBP:"dbp",visitGlucose:"glucose",visitHbA1c:"hba1c",visitHb:"hb",
+  const map={visitWeight:"weight",visitWaist:"waist",visitSBP:"sbp",visitDBP:"dbp",visitGlucose:"glucose",visitHbA1c:"hba1c",visitGA:"ga",visitHb:"hb",
     visitTC:"tc",visitTG:"tg",visitHDL:"hdl",visitLDL:"ldl",visitAST:"ast",visitALT:"alt",visitGGT:"ggt",
     visitUA:"ua",visitCr:"cr",visitEGFR:"egfr"};
-  Object.entries(map).forEach(([id,key])=>$(id).value=r?.[key]??"")
+  Object.entries(map).forEach(([id,key])=>$(id).value=r?.[key]??"");
+  updateVisitABSI()
 }
 async function loadVisit(date){
   isLoadingVisit=true;
@@ -2941,9 +2947,11 @@ function svgEl(name,attrs={},text=""){
 
 function drawHbA1cBackgroundBands(svg,yFor,yMin,yMax,L,R,W){
   const bands=[
-    {lo:yMin,hi:Math.min(7,yMax),fill:"#eaf4ff"},
+    {lo:yMin,hi:Math.min(6,yMax),fill:"#c9e2f7"},
+    {lo:Math.max(6,yMin),hi:Math.min(7,yMax),fill:"#eaf4ff"},
     {lo:Math.max(7,yMin),hi:Math.min(8,yMax),fill:"#fff6d8"},
-    {lo:Math.max(8,yMin),hi:yMax,fill:"#fdeaea"}
+    {lo:Math.max(8,yMin),hi:Math.min(10,yMax),fill:"#fdeaea"},
+    {lo:Math.max(10,yMin),hi:yMax,fill:"#f2bcbc"}
   ];
   bands.forEach(b=>{
     if(b.hi<=b.lo)return;
@@ -2965,9 +2973,9 @@ function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,date
   let min=Math.min(...values),max=Math.max(...values),pad=Math.max(unit==="%"?.3:1,(max-min)*.18);
   min=min-pad;max=max+pad;if(max-min<(unit==="%"?1:2)){min-=.5;max+=.5}
   if(backgroundType==="hba1c"){
-    // 3つのHbA1c領域が常に分かるよう、7%・8%の境界を表示範囲に含める
-    min=Math.min(min,6.5);
-    max=Math.max(max,8.5)
+    // HbA1cの5領域（<6, 6-7, 7-8, 8-10, >=10）が分かるよう表示範囲を確保
+    min=Math.min(min,5.5);
+    max=Math.max(max,10.5)
   }
   const dates=[...new Set(records.map(r=>r.date))];
   const xFor=date=>dates.length===1?(L+W-R)/2:L+dates.indexOf(date)/(dates.length-1)*(W-L-R);
@@ -3130,9 +3138,11 @@ function updateSmbgChartModeUI(){
 }
 function drawSmbgBackground(svg,yFor,yMin,yMax,L,R,W){
   const bands=[
-    {lo:yMin,hi:Math.min(70,yMax),fill:"#fdeaea"},
+    {lo:yMin,hi:Math.min(54,yMax),fill:"#f3b4b4"},
+    {lo:Math.max(54,yMin),hi:Math.min(70,yMax),fill:"#fdeaea"},
     {lo:Math.max(70,yMin),hi:Math.min(181,yMax),fill:"#e9f7ee"},
-    {lo:Math.max(181,yMin),hi:yMax,fill:"#fff7d6"}
+    {lo:Math.max(181,yMin),hi:Math.min(250,yMax),fill:"#fff7d6"},
+    {lo:Math.max(250,yMin),hi:yMax,fill:"#efd77d"}
   ];
   bands.forEach(b=>{
     if(b.hi<=b.lo)return;
@@ -3240,7 +3250,7 @@ async function drawSmbgChart(){
   }
   const W=720,H=410,L=58,R=18,T=22,B=62;
   let yMin=Math.max(0,Math.min(40,Math.floor((Math.min(...vals)-20)/10)*10));
-  let yMax=Math.max(250,Math.ceil((Math.max(...vals)+20)/10)*10);
+  let yMax=Math.max(300,Math.ceil((Math.max(...vals)+20)/10)*10);
   if(yMax-yMin<180)yMax=yMin+180;
   const yFor=v=>T+(yMax-v)/(yMax-yMin)*(H-T-B);
   drawSmbgBackground(svg,yFor,yMin,yMax,L,R,W);
@@ -3248,11 +3258,11 @@ async function drawSmbgChart(){
   const ticks=[];
   const tickStart=Math.ceil(yMin/50)*50;
   for(let v=tickStart;v<=yMax;v+=50)ticks.push(v);
-  [70,180].forEach(v=>{if(v>=yMin&&v<=yMax&&!ticks.includes(v))ticks.push(v)});
+  [54,70,180,250].forEach(v=>{if(v>=yMin&&v<=yMax&&!ticks.includes(v))ticks.push(v)});
   ticks.sort((a,b)=>a-b);
   ticks.forEach(v=>{
     const y=yFor(v);
-    svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:v===70||v===180?"#b8c6c1":"#d8e1de","stroke-width":v===70||v===180?"1.4":"1"}));
+    svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:[54,70,180,250].includes(v)?"#aebdb8":"#d8e1de","stroke-width":[54,70,180,250].includes(v)?"1.4":"1"}));
     svg.appendChild(svgEl("text",{x:L-8,y:y+4,"text-anchor":"end",fill:"#667773","font-size":"11"},String(v)))
   });
   svg.appendChild(svgEl("text",{x:16,y:18,fill:"#667773","font-size":"11"},"mg/dL"));
@@ -3467,8 +3477,8 @@ function drawVisitCombinedChart(svg,records,targetWeight=null){
     wAxis=sep.wAxis;aAxis=sep.aAxis
   }
   if(aAxis){
-    // 7.0%と8.0%の背景区分を常に表示できるよう右軸範囲に含める
-    aAxis={min:Math.min(aAxis.min,6.5),max:Math.max(aAxis.max,8.5)}
+    // HbA1cの5領域が見えるよう右軸範囲を確保
+    aAxis={min:Math.min(aAxis.min,5.5),max:Math.max(aAxis.max,10.5)}
   }
 
   const dates=[...new Set(records.map(r=>r.date))];
@@ -3522,6 +3532,21 @@ function drawVisitCombinedChart(svg,records,targetWeight=null){
     const y=yW(targetWeight);
     svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#8a9894","stroke-width":"1.5","stroke-dasharray":"4 5"}));
     svg.appendChild(svgEl("text",{x:L+4,y:y-5,fill:"#6e7b77","font-size":"11"},`目標体重 ${targetWeight.toFixed(1)} kg`))
+  }
+}
+
+function gaToEstimatedHbA1c(ga){
+  const v=Number(ga);return Number.isFinite(v)?0.216*v+2.978:null
+}
+async function drawGaCharts(){
+  const card=$("gaChartsCard");if(!card||card.style.display==="none")return;
+  const all=await getAll(VISIT_STORE);
+  {
+    const records=dateRangeFilter(all,selectedVisitPeriod).sort((a,b)=>a.date.localeCompare(b.date));
+    const gaRows=records.filter(r=>r.ga!==null&&r.ga!==undefined&&Number.isFinite(Number(r.ga)));
+    drawSimpleLineChart($("visitGAChart"),gaRows,[{key:"ga",color:"#4e82a8"}],"%",330,null);
+    const estimated=gaRows.map(r=>({...r,estimatedHbA1c:gaToEstimatedHbA1c(r.ga)}));
+    drawSimpleLineChart($("visitGAEstimatedHbA1cChart"),estimated,[{key:"estimatedHbA1c",color:"#765a98"}],"%",330,null,null,"hba1c")
   }
 }
 
@@ -3660,6 +3685,7 @@ async function drawVisitCharts(){
   const r=dateRangeFilter(await getAll(VISIT_STORE),selectedVisitPeriod);
   renderVisitEyeInfo();
   if($("egfrSlopeCard")?.style.display!=="none")await drawEgfrSlope();
+  if($("gaChartsCard")?.style.display!=="none")await drawGaCharts();
   applyVisitChartModeUI();
   if(selectedVisitChartMode==="combined"){
     drawVisitCombinedChart($("visitCombinedChart"),r,numOrNull(loadSettings().targetWeight))
@@ -3706,8 +3732,13 @@ async function renderVisits(){
   const records=(await getAll(VISIT_STORE)).sort((a,b)=>b.date.localeCompare(a.date)),box=$("visitList");box.innerHTML="";
   if(!records.length){box.innerHTML='<div class="empty">外来記録はまだありません</div>';return}
   records.forEach(r=>{
+    const absi=calculateABSI(r.weight,r.waist,loadSettings().height);
     const labs=[
-      labChip("体重",r.weight!==null?r.weight.toFixed(1):null,"kg"),labChip("HbA1c",r.hba1c!==null?r.hba1c.toFixed(1):null,"%"),
+      labChip("体重",r.weight!==null&&r.weight!==undefined?Number(r.weight).toFixed(1):null,"kg"),
+      labChip("腹囲",r.waist!==null&&r.waist!==undefined?Number(r.waist).toFixed(1):null,"cm"),
+      labChip("ABSI",absi!==null?absi.toFixed(4):null,""),
+      labChip("HbA1c",r.hba1c!==null&&r.hba1c!==undefined?Number(r.hba1c).toFixed(1):null,"%"),
+      labChip("GA",r.ga!==null&&r.ga!==undefined?Number(r.ga).toFixed(1):null,"%"),
       labChip("血圧",(r.sbp!==null||r.dbp!==null)?`${r.sbp??"—"}/${r.dbp??"—"}`:null,"mmHg"),labChip("血糖",r.glucose,"mg/dL"),
       labChip("LDL-C",r.ldl,"mg/dL"),labChip("TG",r.tg,"mg/dL"),labChip("尿酸",r.ua,"mg/dL"),labChip("eGFR",r.egfr,"")
     ].join("");
@@ -3865,7 +3896,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:48,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:49,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
@@ -3955,8 +3986,9 @@ async function exportDailyCSV(){
   downloadBlob(csv,`lifestyle-care-note-daily-${todayISO()}.csv`,"text/csv;charset=utf-8")
 }
 async function exportVisitCSV(){
-  const rows=await getAll(VISIT_STORE),header=["date","weight","hba1c","sbp","dbp","glucose","tc","tg","hdl","ldl","ast","alt","ggt","ua","cr","egfr","protein","hb","medication","diet","exercise","note"],q=v=>`"${String(v??"").replaceAll('"','""')}"`;
-  const csv="\uFEFF"+[header.join(","),...rows.map(r=>header.map(k=>q(r[k])).join(","))].join("\n");
+  const rows=await getAll(VISIT_STORE),header=["date","weight","waist","absi","hba1c","ga","sbp","dbp","glucose","tc","tg","hdl","ldl","ast","alt","ggt","ua","cr","egfr","protein","hb","medication","diet","exercise","note"],q=v=>`"${String(v??"").replaceAll('"','""')}"`;
+  const height=loadSettings().height;
+  const csv="\uFEFF"+[header.join(","),...rows.map(r=>header.map(k=>q(k==="absi"?calculateABSI(r.weight,r.waist,height):r[k])).join(","))].join("\n");
   downloadBlob(csv,`lifestyle-care-note-outpatient-${todayISO()}.csv`,"text/csv;charset=utf-8")
 }
 async function importJSON(file,includePhotos=false){
@@ -4035,32 +4067,6 @@ async function importJSON(file,includePhotos=false){
   }
 
   await refreshAll();loadSettingsToForm();syncPermanentVisitFieldCheckboxes();applyVisitFieldVisibility();syncDailyMeasureSettingCheckboxes();applyDailyMeasureVisibility()
-}
-
-/* デモ */
-async function createDemo(){
-  if(!confirm("日常30日分と外来6回分のサンプルデータを追加します。同じ日付は上書きされます。よろしいですか？"))return;
-  const base=82.8;
-  for(let i=29;i>=0;i--){
-    const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-i);
-    const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    const trend=(29-i)*(-.035),wave=Math.sin(i*1.13)*.35,morning=Math.round((base+trend+wave)*10)/10,evening=Math.round((morning+.5+Math.sin(i*.6)*.2)*10)/10;
-    await putItem(DAILY_STORE,{date,weightMorning:morning,weightEvening:evening,
-      bpMorningSbp:128+Math.round(Math.sin(i*.55)*6),bpMorningDbp:76+Math.round(Math.sin(i*.48)*4),
-      bpEveningSbp:132+Math.round(Math.sin(i*.63)*7),bpEveningDbp:78+Math.round(Math.sin(i*.51)*4),
-      steps:4000+(i*317)%7000,
-      breakfast:i%3===0?"トースト、卵、コーヒー":"ご飯、味噌汁",lunch:i%4===0?"外食（麺類）":"定食",
-      dinner:"ご飯、主菜、野菜",snack:i%5===0?"菓子":"",note:i%7===0?"外食あり":"",updatedAt:new Date().toISOString()})
-  }
-  for(let j=5;j>=0;j--){
-    const d=new Date();d.setHours(12,0,0,0);d.setMonth(d.getMonth()-j*2);
-    const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    const k=5-j;
-    await putItem(VISIT_STORE,{date,weight:84-k*.7,hba1c:7.4-k*.15,sbp:138-k,dbp:82-Math.floor(k/2),glucose:145-k*4,
-      tc:190-k*2,tg:150-k*5,hdl:48+k,ldl:112-k*3,ast:28-k,alt:35-k*2,ggt:42-k*2,ua:6.2-k*.1,cr:.78,egfr:76+k,
-      protein:"－",hb:14.1,medication:k===3?"薬剤調整あり":"継続",diet:"食事療法継続",exercise:"歩行",note:"",updatedAt:new Date().toISOString()})
-  }
-  $("backupStatus").textContent="サンプルデータを作成しました。";await refreshAll()
 }
 
 async function refreshAll(){await refreshSummary();await refreshWeightReward();await drawHomeChart();await drawSmbgChart();await drawBpChart();await drawVisitCharts();await renderHistory();await renderVisits();renderEyeRecords()}
@@ -4308,20 +4314,21 @@ $("deleteAllPhotosBtn").onclick=async()=>{if(confirm("食事写真をすべて�
   $(id).addEventListener("blur",()=>scheduleDailyAutoSave(100));
 });
 // 外来記録も同様に自動保存
-["visitWeight","visitMedication","visitDiet","visitExercise","visitSBP","visitDBP","visitGlucose","visitHbA1c","visitHb",
+["visitWeight","visitWaist","visitMedication","visitDiet","visitExercise","visitSBP","visitDBP","visitGlucose","visitHbA1c","visitGA","visitHb",
  "visitTC","visitTG","visitHDL","visitLDL","visitAST","visitALT","visitGGT","visitUA","visitCr","visitEGFR","visitProtein","visitNote"].forEach(id=>{
   $(id).addEventListener("input",()=>scheduleVisitAutoSave(700));
   $(id).addEventListener("change",()=>scheduleVisitAutoSave(100));
   $(id).addEventListener("blur",()=>scheduleVisitAutoSave(100));
 });
+["visitWeight","visitWaist"].forEach(id=>$(id).addEventListener("input",updateVisitABSI));
 
 $("saveEyeBtn").onclick=saveEyeCurrent;
 $("clearEyeFormBtn").onclick=()=>{setEyeForm({date:todayISO()});setSaveStatus("eyeStatus","入力欄をクリアしました。","")};
-["height","startWeightMorning","startWeightEvening"].forEach(id=>$(id).oninput=updateBMI);
+["height","startWeightMorning","startWeightEvening"].forEach(id=>$(id).oninput=()=>{updateBMI();if(id==="height")updateVisitABSI()});
 $("saveSettingsBtn").onclick=async()=>{
   const old=loadSettings();
   saveSettings({...old,height:numOrNull($("height").value),startWeightMorning:numOrNull($("startWeightMorning").value),startWeightEvening:numOrNull($("startWeightEvening").value),targetWeight:numOrNull($("targetWeight").value)});
-  $("settingsStatus").textContent="設定を保存しました。";updateBMI();await refreshSummary();await refreshWeightReward();await drawHomeChart();await drawVisitCharts()
+  $("settingsStatus").textContent="設定を保存しました。";updateBMI();updateVisitABSI();await refreshSummary();await refreshWeightReward();await drawHomeChart();await drawVisitCharts()
 };
 $("exportJsonBtn").onclick=exportJSON;$("exportCsvBtn").onclick=exportDailyCSV;$("exportVisitCsvBtn").onclick=exportVisitCSV;
 $("exportPhotoBackupBtn").onclick=exportPhotoBackup;
@@ -4343,14 +4350,6 @@ $("importPhotoBackupInput").onchange=async e=>{
   }
   e.target.value=""
 };
-$("demoBtn").onclick=createDemo;
-$("clearBtn").onclick=async()=>{
-  if(confirm("日常記録・外来記録・眼科受診記録をすべて削除します。この操作は元に戻せません。")){
-    await clearStore(DAILY_STORE);await clearStore(VISIT_STORE);await clearMealPhotos();clearDraftSync(DAILY_DRAFT_KEY);clearDraftSync(VISIT_DRAFT_KEY);saveMealReviewSelections({good:null,improve:null});localStorage.removeItem(WEIGHT_REWARD_KEY);localStorage.removeItem(EYE_RECORDS_KEY);setDailyForm({date:todayISO()});setVisitForm({date:todayISO()});
-    $("backupStatus").textContent="すべての記録と食事写真を削除しました。";renderEyeRecords();await refreshAll();await loadMealPhotosForDate(todayISO());await refreshStorageUsage()
-  }
-};
-
 
 
 // アプリを閉じる・別画面へ移る直前にも、入力中内容を同期的に下書き保存。
@@ -4401,7 +4400,7 @@ const MANUAL_DEFINITIONS={
   },
   app:{
     title:"生活習慣ケアノート 利用マニュアル",
-    pages:["./manual_app_01.png","./manual_app_02.png","./manual_app_03.png","./manual_app_04.png","./manual_app_05.png","./manual_app_06.png","./manual_app_07.png","./manual_app_08.png"]
+    pages:["./manual_app_01.png","./manual_app_02.png","./manual_app_03.png","./manual_app_04.png","./manual_app_05.png","./manual_app_06.png","./manual_app_07.png","./manual_app_08.png","./manual_app_09.png","./manual_app_10.png","./manual_app_11.png","./manual_app_12.png","./manual_app_13.png"]
   }
 };
 
