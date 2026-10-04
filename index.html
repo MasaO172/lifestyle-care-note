@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v53</title>
+<title>生活習慣ケアノート v54</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -572,7 +572,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v53: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+/* v54: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
 .photo-backup-box{
   margin-top:14px;
   border:2px solid #8eb7ac;
@@ -594,7 +594,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v53: SMBG範囲別割合（CGM風の参考表示） */
+/* v54: SMBG範囲別割合（CGM風の参考表示） */
 .smbg-range-wrap{margin-top:14px}
 .smbg-range-grid{
   display:grid;
@@ -621,7 +621,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v53: ABSI z-score（年齢・性別標準化） */
+/* v54: ABSI z-score（年齢・性別標準化） */
 .absi-z-panel{display:none;margin-top:8px;border:1px solid #c8ddd7;border-radius:12px;background:#f8fbfa;padding:11px 12px}
 .absi-z-panel .grid2{margin-top:8px}
 .absi-z-result{margin-top:9px;border-radius:10px;padding:9px 10px;background:#eef5f3;border-left:4px solid #2f6f65;font-size:12px;line-height:1.7}
@@ -631,6 +631,83 @@ body.manual-open{overflow:hidden}
 .absi-z-result.very-low{background:#e9f1fa;border-left-color:#365f86}
 .absi-z-score{font-size:19px;font-weight:900;color:#294f45}
 
+
+/* v54: 自宅体重グラフの出来事マーカー */
+.event-legend-diamond{
+  display:inline-block;width:auto!important;height:auto!important;background:none!important;
+  color:#b34f3b;font-size:15px;font-weight:900;line-height:1
+}
+.home-event-overlay{
+  position:fixed;inset:0;z-index:2300;background:rgba(20,32,28,.38);
+  display:none;align-items:center;justify-content:center;padding:18px
+}
+.home-event-overlay.open{display:flex}
+.home-event-card{
+  width:min(520px,100%);max-height:76vh;overflow:auto;background:#fff;border-radius:18px;
+  box-shadow:0 18px 55px rgba(0,0,0,.24);padding:17px
+}
+.home-event-date{font-weight:900;color:var(--accent);font-size:17px}
+.home-event-text{
+  margin-top:10px;padding:12px;border-radius:12px;background:#fff7f3;border-left:5px solid #b34f3b;
+  white-space:pre-wrap;line-height:1.8;font-size:14px
+}
+
+/* v54: 外来薬剤経過 */
+.med-period-manager{
+  margin-top:10px;padding:12px;border:1px solid #cfe0db;border-radius:14px;background:#f8fbfa
+}
+.med-period-manager h3{margin-top:0;color:var(--accent)}
+.med-period-add{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(130px,.8fr) auto;gap:8px;align-items:end}
+.med-period-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.med-period-item{
+  border:1px solid var(--line);border-radius:11px;background:#fff;padding:9px 10px;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center
+}
+.med-period-name{font-weight:900;color:#334d46}
+.med-period-dates{font-size:11px;color:var(--muted);margin-top:2px}
+.med-period-stop{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.med-period-stop input{width:145px;padding:7px 6px;font-size:11px}
+.med-period-history details{margin-top:9px}
+.med-period-history summary{cursor:pointer;font-weight:800;color:var(--accent)}
+@media(max-width:620px){
+  .med-period-add{grid-template-columns:1fr}
+  .med-period-item{grid-template-columns:1fr}
+  .med-period-stop{justify-content:flex-start}
+}
+
+/* v54: グラフ下の薬剤使用期間 */
+.med-timeline{
+  margin-top:15px;border-top:1px solid var(--line);padding-top:11px
+}
+.med-timeline-title{font-weight:900;color:var(--accent);font-size:13px}
+.med-timeline-note{font-size:10.5px;color:var(--muted);margin:3px 0 9px;line-height:1.55}
+.med-timeline-row{
+  display:grid;grid-template-columns:minmax(82px,145px) minmax(0,1fr);gap:9px;align-items:center;
+  margin:7px 0
+}
+.med-timeline-label{font-size:11px;font-weight:800;color:#40534d;overflow-wrap:anywhere}
+.med-timeline-label small{display:block;font-size:9px;font-weight:600;color:#87948f}
+.med-timeline-track{
+  height:22px;position:relative;background:#f2f5f4;border-radius:7px;overflow:hidden;
+  border:1px solid #e2e9e6
+}
+.med-timeline-bar{
+  position:absolute;top:8px;height:6px;border-radius:5px;min-width:5px
+}
+.med-timeline-dot{
+  position:absolute;top:5px;width:12px;height:12px;border-radius:50%;transform:translateX(-6px);
+  border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.12)
+}
+.med-timeline-arrow{
+  position:absolute;top:4px;transform:translateX(-7px);font-size:12px;font-weight:900
+}
+.med-timeline-axis{display:flex;justify-content:space-between;margin-left:154px;font-size:9px;color:#8b9894}
+@media(max-width:620px){
+  .med-timeline-row{grid-template-columns:88px minmax(0,1fr);gap:6px}
+  .med-timeline-axis{margin-left:94px}
+  .med-timeline-label{font-size:10px}
+}
+
 </style>
 </head>
 <body>
@@ -638,7 +715,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v53</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v54</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -888,7 +965,7 @@ body.manual-open{overflow:hidden}
       <span><i style="background:#2f6f65"></i>朝</span>
       <span><i style="background:#d07c39"></i>夜</span>
     </div>
-    <div class="note" style="margin-top:8px">測定していない時点は空白とし、その前後を線で結びません。<strong>「＊」は排便があった日</strong>を示します。</div>
+    <div class="note" style="margin-top:8px">測定していない時点は空白とし、その前後を線で結びません。<strong>「＊」は排便があった日、「◆」は出来事・体調などの記録がある日</strong>です。「◆」をタップすると内容を確認できます。</div>
   </div>
 
   <details class="card chart-details" id="smbgChartDetails">
@@ -1051,6 +1128,26 @@ body.manual-open{overflow:hidden}
 
     <div class="section-label" data-visit-section="treatment">治療内容</div>
     <div data-visit-field="medication"><label for="visitMedication">薬剤</label><textarea id="visitMedication" placeholder="薬剤名、変更内容など"></textarea></div>
+
+    <div data-visit-field="medication" class="med-period-manager">
+      <h3>薬剤経過（グラフ表示用）</h3>
+      <div class="note">体重・HbA1c・eGFRなどの変化と投薬期間を重ねて確認するための記録です。新規投薬時に薬剤名と開始日を登録し、中止時は使用中薬剤の「中止」から中止日を記録します。同じ薬剤を再開した場合は、新しい期間としてもう一度登録してください。</div>
+      <div class="med-period-add" style="margin-top:9px">
+        <div><label for="medPeriodName">新規投薬：薬剤名</label><input type="text" id="medPeriodName" placeholder="例：マンジャロ、SGLT2阻害薬"></div>
+        <div><label for="medPeriodStart">開始日</label><input type="date" id="medPeriodStart"></div>
+        <div><button id="addMedicationPeriodBtn" type="button" class="small">＋ 新規投薬として登録</button></div>
+      </div>
+      <div class="section-label" style="margin-top:12px">現在使用中</div>
+      <div id="activeMedicationPeriods" class="med-period-list"></div>
+      <div class="med-period-history">
+        <details>
+          <summary>中止済みを含む薬剤経過を見る</summary>
+          <div id="medicationPeriodHistory" class="med-period-list"></div>
+        </details>
+      </div>
+      <div id="medicationPeriodStatus" class="status"></div>
+    </div>
+
     <div class="grid2">
       <div data-visit-field="diet"><label for="visitDiet">食事</label><input type="text" id="visitDiet" placeholder="例：1600 kcal/日"></div>
       <div data-visit-field="exercise"><label for="visitExercise">運動</label><input type="text" id="visitExercise" placeholder="例：歩行30分/日"></div>
@@ -1148,6 +1245,7 @@ body.manual-open{overflow:hidden}
       </div>
       <div class="combined-chart-note">左軸は体重、右軸はHbA1cです。背景はHbA1cの右軸に対応し、6.0%未満を濃いめの青、6.0〜7.0%未満を薄い青、7.0〜8.0%未満を薄い黄色、8.0〜10.0%未満を薄い赤、10.0%以上を濃いめの赤で表示します。2本の線は左右で別スケールなので、線の傾きそのものを直接比較するのではなく、体重とHbA1cが同じ時期にどのように変化しているかを見るためのグラフです。</div>
     </div>
+    <div id="visitMedicationTimeline" class="med-timeline"></div>
   </div>
 
   <div class="card" id="gaChartsCard" style="display:none">
@@ -1165,6 +1263,7 @@ body.manual-open{overflow:hidden}
       <span><i style="background:#f2bcbc"></i>10.0%以上</span>
     </div>
     <div class="note" style="margin-top:8px">推定HbA1cは <strong>HbA1c = 0.216 × GA + 2.978</strong> で換算した参考値です（Kogaら, Endocr J 2014）。実測HbA1cの代わりではなく、GAとHbA1cの関係が変化する病態ではずれることがあります。</div>
+    <div id="gaMedicationTimeline" class="med-timeline"></div>
   </div>
 
   <div class="card egfr-slope-card" id="egfrSlopeCard">
@@ -1200,6 +1299,7 @@ body.manual-open{overflow:hidden}
       <span><i style="height:10px;width:10px;border-radius:50%;background:#2f6f65"></i>eGFR実測値</span>
       <span><i style="height:0;border-top:3px dashed #b3402f"></i>回帰直線</span>
     </div>
+    <div id="egfrMedicationTimeline" class="med-timeline"></div>
     <div class="egfr-slope-note">
       判定目安：年間低下が3 mL/min/1.73m²未満＝「安定」、3以上5未満＝「経過観察」、5以上＝「急速進行」。
       <strong>測定点が3点未満、または観察期間が6か月未満の場合は「参考値」</strong>として表示します。
@@ -1877,6 +1977,20 @@ body.manual-open{overflow:hidden}
 </div>
 
 
+
+<div id="homeEventOverlay" class="home-event-overlay" aria-hidden="true">
+  <div class="home-event-card" role="dialog" aria-modal="true" aria-labelledby="homeEventDate">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div>
+        <div class="home-event-date" id="homeEventDate">出来事</div>
+        <div class="note" style="margin-top:2px">体重変化と生活上の出来事を一緒に振り返れます。</div>
+      </div>
+      <button id="homeEventCloseBtn" type="button" class="secondary small">閉じる</button>
+    </div>
+    <div class="home-event-text" id="homeEventText"></div>
+  </div>
+</div>
+
 <div id="manualViewer" class="manual-viewer" aria-hidden="true">
   <div class="manual-viewer-inner">
     <div class="manual-viewer-bar">
@@ -1944,6 +2058,7 @@ const SMBG_COLORS={bgBeforeBreakfast:"#2f6f65",bgAfterBreakfast:"#4e82a8",bgBefo
 const SMBG_CHART_MODE_KEY="weightControlSmbgChartModeV28";
 const BP_CHART_MODE_KEY="weightControlBpChartModeV35";
 const EYE_RECORDS_KEY="weightControlEyeRecordsV35";
+const MEDICATION_PERIODS_KEY="weightControlMedicationPeriodsV54";
 let dailyMeasureTemporaryFields=new Set();
 let dailyMeasureShowAllTemporary=false;
 let db=null,useFallback=false,selectedPeriod=14,selectedVisitPeriod=365,selectedSmbgPeriod=14,selectedBpPeriod=14,selectedChartMode="continuous";
@@ -2675,6 +2790,131 @@ function resetVisitTemporaryDisplay(){
   applyVisitFieldVisibility();
 }
 
+
+/* 外来の薬剤使用期間 */
+function loadMedicationPeriods(){
+  try{
+    const x=JSON.parse(localStorage.getItem(MEDICATION_PERIODS_KEY)||"[]");
+    return Array.isArray(x)?x.filter(p=>p&&p.id&&p.name&&p.startDate):[]
+  }catch(e){return []}
+}
+function saveMedicationPeriods(periods){
+  localStorage.setItem(MEDICATION_PERIODS_KEY,JSON.stringify(periods))
+}
+function medicationPeriodId(){
+  return `med-${Date.now()}-${Math.random().toString(36).slice(2,8)}`
+}
+function visitDateOrToday(){
+  return $("visitDate")?.value||todayISO()
+}
+function medicationColor(name){
+  const colors=["#5f83a6","#b47a45","#698c68","#9a6f9b","#4f8f8b","#b45f6a","#8a7d48","#6f77a9"];
+  let h=0;for(const ch of String(name||""))h=(h*31+ch.charCodeAt(0))>>>0;
+  return colors[h%colors.length]
+}
+async function refreshMedicationVisuals(){
+  renderMedicationManager();
+  if($("view-outpatient")?.classList.contains("active"))await drawVisitCharts()
+}
+function addMedicationPeriod(){
+  const name=$("medPeriodName").value.trim(),start=$("medPeriodStart").value||visitDateOrToday();
+  if(!name){setSaveStatus("medicationPeriodStatus","薬剤名を入力してください。","warn");return}
+  if(!start){setSaveStatus("medicationPeriodStatus","開始日を入力してください。","warn");return}
+  const arr=loadMedicationPeriods();
+  arr.push({id:medicationPeriodId(),name,startDate:start,endDate:null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+  saveMedicationPeriods(arr);
+  $("medPeriodName").value="";
+  $("medPeriodStart").value=visitDateOrToday();
+  setSaveStatus("medicationPeriodStatus",`${name} を ${start.replaceAll("-","/")} から「使用中」として登録しました。`,"ok");
+  refreshMedicationVisuals()
+}
+function stopMedicationPeriod(id,date){
+  const arr=loadMedicationPeriods(),p=arr.find(x=>x.id===id);if(!p)return;
+  const end=date||visitDateOrToday();
+  if(!end){setSaveStatus("medicationPeriodStatus","中止日を入力してください。","warn");return}
+  if(end<p.startDate){setSaveStatus("medicationPeriodStatus","中止日は開始日以降にしてください。","warn");return}
+  p.endDate=end;p.updatedAt=new Date().toISOString();
+  saveMedicationPeriods(arr);
+  setSaveStatus("medicationPeriodStatus",`${p.name} の中止日を ${end.replaceAll("-","/")} として記録しました。`,"ok");
+  refreshMedicationVisuals()
+}
+function deleteMedicationPeriod(id){
+  const arr=loadMedicationPeriods(),p=arr.find(x=>x.id===id);if(!p)return;
+  if(!confirm(`${p.name}（${p.startDate}${p.endDate?`〜${p.endDate}`:"〜使用中"}）の薬剤経過を削除しますか？`))return;
+  saveMedicationPeriods(arr.filter(x=>x.id!==id));
+  setSaveStatus("medicationPeriodStatus","薬剤経過を削除しました。","ok");
+  refreshMedicationVisuals()
+}
+function renderMedicationManager(){
+  const activeBox=$("activeMedicationPeriods"),historyBox=$("medicationPeriodHistory");
+  if(!activeBox||!historyBox)return;
+  if($("medPeriodStart")&&!$("medPeriodStart").value)$("medPeriodStart").value=visitDateOrToday();
+  const arr=loadMedicationPeriods().sort((a,b)=>b.startDate.localeCompare(a.startDate));
+  const active=arr.filter(p=>!p.endDate);
+
+  activeBox.innerHTML=active.length?"":'<div class="note">現在「使用中」として登録されている薬剤はありません。</div>';
+  active.forEach(p=>{
+    const el=document.createElement("div");el.className="med-period-item";
+    const defaultEnd=visitDateOrToday()<p.startDate?p.startDate:visitDateOrToday();
+    el.innerHTML=`<div><div class="med-period-name">${escapeHtml(p.name)}</div><div class="med-period-dates">開始 ${escapeHtml(p.startDate.replaceAll("-","/"))}　→　使用中</div></div>
+      <div class="med-period-stop"><input type="date" class="stop-date" min="${escapeHtml(p.startDate)}" value="${escapeHtml(defaultEnd)}"><button type="button" class="small danger stop">中止</button></div>`;
+    el.querySelector(".stop").onclick=()=>stopMedicationPeriod(p.id,el.querySelector(".stop-date").value);
+    activeBox.appendChild(el)
+  });
+
+  historyBox.innerHTML=arr.length?"":'<div class="note">薬剤経過の記録はまだありません。</div>';
+  arr.forEach(p=>{
+    const el=document.createElement("div");el.className="med-period-item";
+    el.innerHTML=`<div><div class="med-period-name">${escapeHtml(p.name)}</div><div class="med-period-dates">${escapeHtml(p.startDate.replaceAll("-","/"))} → ${p.endDate?escapeHtml(p.endDate.replaceAll("-","/")):"使用中"}</div></div>
+      <div><button type="button" class="ghost small del">削除</button></div>`;
+    el.querySelector(".del").onclick=()=>deleteMedicationPeriod(p.id);
+    historyBox.appendChild(el)
+  })
+}
+function renderMedicationTimeline(container,records){
+  if(!container)return;
+  const dates=(records||[]).filter(r=>r&&r.date).map(r=>r.date).sort();
+  if(!dates.length){
+    container.innerHTML='<div class="med-timeline-title">薬剤使用期間</div><div class="med-timeline-note">このグラフの期間を決めるデータがありません。</div>';
+    return
+  }
+  let startMs=parseLocalDate(dates[0]).getTime(),endMs=parseLocalDate(dates[dates.length-1]).getTime();
+  if(endMs<=startMs){startMs-=15*86400000;endMs+=15*86400000}
+  const range=endMs-startMs;
+  const periods=loadMedicationPeriods()
+    .filter(p=>{
+      const ps=parseLocalDate(p.startDate).getTime(),pe=p.endDate?parseLocalDate(p.endDate).getTime():Infinity;
+      return ps<=endMs&&pe>=startMs
+    })
+    .sort((a,b)=>a.startDate.localeCompare(b.startDate)||a.name.localeCompare(b.name,"ja"));
+  if(!periods.length){
+    container.innerHTML='<div class="med-timeline-title">薬剤使用期間</div><div class="med-timeline-note">この期間に重なる薬剤経過の登録はありません。</div>';
+    return
+  }
+  const rows=periods.map(p=>{
+    const rawStart=parseLocalDate(p.startDate).getTime();
+    const rawEnd=p.endDate?parseLocalDate(p.endDate).getTime():endMs;
+    const s=Math.max(startMs,rawStart),e=Math.min(endMs,rawEnd);
+    const left=Math.max(0,Math.min(100,(s-startMs)/range*100));
+    const right=Math.max(left,Math.min(100,(e-startMs)/range*100));
+    const width=Math.max(.8,right-left);
+    const color=medicationColor(p.name);
+    const status=p.endDate?`${p.startDate.replaceAll("-","/")}〜${p.endDate.replaceAll("-","/")}`:`${p.startDate.replaceAll("-","/")}〜使用中`;
+    return `<div class="med-timeline-row">
+      <div class="med-timeline-label">${escapeHtml(p.name)}<small>${escapeHtml(status)}</small></div>
+      <div class="med-timeline-track" title="${escapeHtml(p.name)} ${escapeHtml(status)}">
+        <span class="med-timeline-bar" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;background:${color}"></span>
+        <span class="med-timeline-dot" style="left:${left.toFixed(2)}%;background:${color}"></span>
+        ${p.endDate?`<span class="med-timeline-dot" style="left:${right.toFixed(2)}%;background:${color}"></span>`:`<span class="med-timeline-arrow" style="left:${right.toFixed(2)}%;color:${color}">▶</span>`}
+      </div>
+    </div>`
+  }).join("");
+  container.innerHTML=`<div class="med-timeline-title">薬剤使用期間</div>
+    <div class="med-timeline-note">外来の「薬剤経過」で登録した開始日〜中止日を、グラフの横軸期間に合わせて表示します。▶ はグラフ右端時点で使用中です。</div>
+    ${rows}
+    <div class="med-timeline-axis"><span>${dates[0].replaceAll("-","/")}</span><span>${dates[dates.length-1].replaceAll("-","/")}</span></div>`
+}
+
 /* 外来記録 */
 const visitIds=["visitWeight","visitWaist","visitSBP","visitDBP","visitGlucose","visitHbA1c","visitGA","visitHb","visitTC","visitTG","visitHDL","visitLDL","visitAST","visitALT","visitGGT","visitUA","visitCr","visitEGFR"];
 function calculateABSI(weightKg,waistCm,heightCm){
@@ -3021,12 +3261,47 @@ function drawHbA1cBackgroundBands(svg,yFor,yMin,yMax,L,R,W){
   })
 }
 
-function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,dateMarkerKey=null,backgroundType=null){
+
+function openHomeEventPopup(date,text){
+  const overlay=$("homeEventOverlay");if(!overlay)return;
+  $("homeEventDate").textContent=`${String(date).replaceAll("-","/")} の出来事`;
+  $("homeEventText").textContent=String(text||"");
+  overlay.classList.add("open");
+  overlay.setAttribute("aria-hidden","false")
+}
+function closeHomeEventPopup(){
+  const overlay=$("homeEventOverlay");if(!overlay)return;
+  overlay.classList.remove("open");
+  overlay.setAttribute("aria-hidden","true")
+}
+function addHomeEventMarker(svg,x,y,date,text){
+  const g=svgEl("g",{role:"button",tabindex:"0","aria-label":`${date} 出来事を表示`});
+  g.style.cursor="pointer";
+  const hit=svgEl("circle",{cx:x,cy:y,r:"14",fill:"transparent"});
+  const diamond=svgEl("polygon",{points:`${x},${y-7} ${x+7},${y} ${x},${y+7} ${x-7},${y}`,fill:"#b34f3b",stroke:"#fff","stroke-width":"1.5"});
+  const title=svgEl("title",{},`${date} 出来事：${String(text).replace(/\s+/g," ").slice(0,80)}`);
+  g.appendChild(hit);g.appendChild(diamond);g.appendChild(title);
+  const activate=()=>openHomeEventPopup(date,text);
+  g.addEventListener("click",activate);
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate()}});
+  svg.appendChild(g)
+}
+
+function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,dateMarkerKey=null,backgroundType=null,eventKey=null){
   svg.innerHTML="";
   const values=[];
   records.forEach(r=>series.forEach(s=>{const v=r[s.key];if(v!==null&&v!==undefined)values.push(Number(v))}));
+  const eventRows=eventKey?records.filter(r=>String(r[eventKey]||"").trim()!==""):[];
   if(!values.length){
-    svg.appendChild(svgEl("text",{x:360,y:height/2,"text-anchor":"middle",fill:"#788783","font-size":"20"},"この期間に記録がありません"));return
+    svg.appendChild(svgEl("text",{x:360,y:height/2-18,"text-anchor":"middle",fill:"#788783","font-size":"20"},"この期間に体重記録がありません"));
+    if(eventRows.length){
+      const W=720,H=height,L=58,R=18,B=48,dates=[...new Set(records.map(r=>r.date))];
+      const xFor=date=>dates.length===1?(L+W-R)/2:L+dates.indexOf(date)/Math.max(1,dates.length-1)*(W-L-R);
+      eventRows.forEach(r=>addHomeEventMarker(svg,xFor(r.date),height/2+25,r.date,r[eventKey]));
+      const ticks=Math.min(6,dates.length);
+      for(let i=0;i<ticks;i++){const idx=Math.round(i*(dates.length-1)/Math.max(1,ticks-1)),d=dates[idx];svg.appendChild(svgEl("text",{x:xFor(d),y:H-20,"text-anchor":"middle",fill:"#788783","font-size":"12"},d.slice(5).replace("-","/")))}
+    }
+    return
   }
   const W=720,H=height,L=58,R=18,T=20,B=48;
   let min=Math.min(...values),max=Math.max(...values),pad=Math.max(unit==="%"?.3:1,(max-min)*.18);
@@ -3059,6 +3334,11 @@ function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,date
       svg.appendChild(mark)
     })
   }
+  if(eventKey){
+    records.filter(r=>String(r[eventKey]||"").trim()!=="").forEach(r=>{
+      addHomeEventMarker(svg,xFor(r.date),H-B-11,r.date,r[eventKey])
+    })
+  }
   series.forEach(s=>{
     let prev=null;
     records.forEach(r=>{
@@ -3084,7 +3364,8 @@ async function drawHomeChart(){
       '<span><i style="background:#2f6f65;height:8px;width:8px;border-radius:50%"></i>朝の点</span>'+
       '<span><i style="background:#d07c39;height:8px;width:8px;border-radius:50%"></i>夜の点</span>'+
       '<span><i style="background:#40524e"></i>連続線</span>'+
-      '<span><i class="bowel-legend-star">＊</i>排便あり</span>';
+      '<span><i class="bowel-legend-star">＊</i>排便あり</span>'+
+      '<span><i class="event-legend-diamond">◆</i>出来事（タップ）</span>';
     $("chartModeNote").textContent="朝→夜→翌朝→翌夜…の順に、測定した各点を1本の線で結びます。未測定の時点がある場合はそこで線を切ります。";
     return;
   }
@@ -3092,11 +3373,12 @@ async function drawHomeChart(){
   const series=[];
   if($("showMorning").checked)series.push({key:"weightMorning",color:"#2f6f65"});
   if($("showEvening").checked)series.push({key:"weightEvening",color:"#d07c39",dash:"7 5"});
-  drawSimpleLineChart($("weightChart"),all,series,"kg",390,target,"bowelMovement");
+  drawSimpleLineChart($("weightChart"),all,series,"kg",390,target,"bowelMovement",null,"note");
   $("homeChartLegend").innerHTML=
     '<span><i style="background:#2f6f65"></i>朝</span>'+
     '<span><i style="background:#d07c39"></i>夜</span>'+
-    '<span><i class="bowel-legend-star">＊</i>排便あり</span>';
+    '<span><i class="bowel-legend-star">＊</i>排便あり</span>'+
+    '<span><i class="event-legend-diamond">◆</i>出来事（タップ）</span>';
   $("chartModeNote").textContent="朝体重と夜体重を、それぞれ別の折れ線として表示します。";
 }
 
@@ -3111,8 +3393,21 @@ function drawContinuousHomeChart(svg,records,target=null){
   });
 
   const values=points.filter(p=>p.value!==null&&p.value!==undefined).map(p=>Number(p.value));
+  const eventRows=records.filter(r=>String(r.note||"").trim()!=="");
   if(!values.length){
-    svg.appendChild(svgEl("text",{x:360,y:195,"text-anchor":"middle",fill:"#788783","font-size":"20"},"この期間に体重記録がありません"));
+    svg.appendChild(svgEl("text",{x:360,y:170,"text-anchor":"middle",fill:"#788783","font-size":"20"},"この期間に体重記録がありません"));
+    if(eventRows.length){
+      const W=720,H=390,L=58,R=18;
+      const xForDate=date=>{
+        const di=records.findIndex(r=>r.date===date);
+        if(di<0)return L;
+        const n=Math.max(1,records.length*2-1);
+        return L+(di*2+.5)/n*(W-L-R)
+      };
+      eventRows.forEach(r=>addHomeEventMarker(svg,xForDate(r.date),215,r.date,r.note));
+      const step=Math.max(1,Math.ceil(records.length/6));
+      records.forEach((r,di)=>{if(di%step!==0&&di!==records.length-1)return;svg.appendChild(svgEl("text",{x:xForDate(r.date),y:H-20,"text-anchor":"middle",fill:"#788783","font-size":"12"},r.date.slice(5).replace("-","/")))})
+    }
     return;
   }
 
@@ -3159,6 +3454,13 @@ function drawContinuousHomeChart(svg,records,target=null){
     const mark=svgEl("text",{x,y:H-B+15,"text-anchor":"middle",fill:"#8d5a3b","font-size":"18","font-weight":"900"},"＊");
     mark.appendChild(svgEl("title",{},`${r.date} 排便あり`));
     svg.appendChild(mark)
+  });
+
+  // 出来事・体調などがある日は「◆」。タップすると内容を表示
+  records.forEach((r,di)=>{
+    if(String(r.note||"").trim()==="")return;
+    const x=(xFor(di*2)+xFor(di*2+1))/2;
+    addHomeEventMarker(svg,x,H-B-11,r.date,r.note)
   });
 
   // 未測定時点をまたいでは結ばない
@@ -3605,7 +3907,8 @@ async function drawGaCharts(){
     const gaRows=records.filter(r=>r.ga!==null&&r.ga!==undefined&&Number.isFinite(Number(r.ga)));
     drawSimpleLineChart($("visitGAChart"),gaRows,[{key:"ga",color:"#4e82a8"}],"%",330,null);
     const estimated=gaRows.map(r=>({...r,estimatedHbA1c:gaToEstimatedHbA1c(r.ga)}));
-    drawSimpleLineChart($("visitGAEstimatedHbA1cChart"),estimated,[{key:"estimatedHbA1c",color:"#765a98"}],"%",330,null,null,"hba1c")
+    drawSimpleLineChart($("visitGAEstimatedHbA1cChart"),estimated,[{key:"estimatedHbA1c",color:"#765a98"}],"%",330,null,null,"hba1c");
+    renderMedicationTimeline($("gaMedicationTimeline"),gaRows)
   }
 }
 
@@ -3693,6 +3996,7 @@ async function drawEgfrSlope(){
 
   const slopeYearEl=$("egfrSlopeYear"),slopeMonthEl=$("egfrSlopeMonth"),r2El=$("egfrSlopeR2"),dataEl=$("egfrSlopeData");
   const result=$("egfrSlopeResult"),svg=$("egfrSlopeChart");
+  renderMedicationTimeline($("egfrMedicationTimeline"),valid);
 
   if(valid.length<2){
     slopeYearEl.textContent="データ不足";slopeMonthEl.textContent="—";r2El.textContent="—";
@@ -3752,6 +4056,7 @@ async function drawVisitCharts(){
     drawSimpleLineChart($("visitWeightChart"),r,[{key:"weight",color:"#2f6f65"}],"kg",330,numOrNull(loadSettings().targetWeight));
     drawSimpleLineChart($("visitHbA1cChart"),r,[{key:"hba1c",color:"#765a98"}],"%",330,null,null,"hba1c")
   }
+  renderMedicationTimeline($("visitMedicationTimeline"),r)
 }
 
 /* 履歴 */
@@ -3958,7 +4263,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:53,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:54,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
@@ -3975,7 +4280,8 @@ async function buildBackupPayload(){
     },
     dailyRecords:await getAll(DAILY_STORE),
     outpatientRecords:await getAll(VISIT_STORE),
-    eyeRecords:loadEyeRecords()
+    eyeRecords:loadEyeRecords(),
+    medicationPeriods:loadMedicationPeriods()
   }
 }
 async function exportPhotoBackup(){
@@ -4101,6 +4407,7 @@ async function importJSON(file,includePhotos=false){
   for(const r of daily)if(r.date)await putItem(DAILY_STORE,r);
   for(const r of visits)if(r.date)await putItem(VISIT_STORE,r);
   if(eyes.length)saveEyeRecords(eyes.filter(r=>r&&r.date));
+  if(Array.isArray(data.medicationPeriods))saveMedicationPeriods(data.medicationPeriods.filter(p=>p&&p.id&&p.name&&p.startDate));
 
   if(includePhotos){
     if(!Array.isArray(data.mealPhotos))throw new Error("このファイルには食事写真が含まれていません。通常バックアップではなく「完全バックアップ（写真を含む）」を選んでください。");
@@ -4138,7 +4445,7 @@ function showView(name){
   const view=$("view-"+name);if(!view)return;view.classList.add("active");
   const tab=document.querySelector(`.tabs button[data-view="${name}"]`);if(tab)tab.classList.add("active");
   if(name==="chart"){drawHomeChart();drawSmbgChart();drawBpChart()}
-  if(name==="outpatient"){drawVisitCharts();renderVisits()}
+  if(name==="outpatient"){renderMedicationManager();drawVisitCharts();renderVisits()}
   if(name==="eye")renderEyeRecords();
   if(name==="review")renderMealReview();
   if(name==="history")renderHistory();
@@ -4257,6 +4564,13 @@ $("visitDate").onchange=async()=>{
   await loadVisit(newDate);
 };
 $("saveVisitBtn").onclick=()=>saveVisit(false);
+$("addMedicationPeriodBtn").onclick=addMedicationPeriod;
+$("visitDate").addEventListener("change",()=>{
+  if($("medPeriodStart"))$("medPeriodStart").value=$("visitDate").value||todayISO();
+  renderMedicationManager()
+});
+$("homeEventCloseBtn").onclick=closeHomeEventPopup;
+$("homeEventOverlay").addEventListener("click",e=>{if(e.target.id==="homeEventOverlay")closeHomeEventPopup()});
 $("clearVisitBtn").onclick=()=>{
   clearTimeout(visitAutoSaveTimer);clearDraftSync(VISIT_DRAFT_KEY);
   isLoadingVisit=true;setVisitForm({date:$("visitDate").value||todayISO()});isLoadingVisit=false;
