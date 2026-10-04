@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v54</title>
+<title>生活習慣ケアノート v55</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -572,7 +572,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v54: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+/* v55: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
 .photo-backup-box{
   margin-top:14px;
   border:2px solid #8eb7ac;
@@ -594,7 +594,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v54: SMBG範囲別割合（CGM風の参考表示） */
+/* v55: SMBG範囲別割合（CGM風の参考表示） */
 .smbg-range-wrap{margin-top:14px}
 .smbg-range-grid{
   display:grid;
@@ -621,7 +621,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v54: ABSI z-score（年齢・性別標準化） */
+/* v55: ABSI z-score（年齢・性別標準化） */
 .absi-z-panel{display:none;margin-top:8px;border:1px solid #c8ddd7;border-radius:12px;background:#f8fbfa;padding:11px 12px}
 .absi-z-panel .grid2{margin-top:8px}
 .absi-z-result{margin-top:9px;border-radius:10px;padding:9px 10px;background:#eef5f3;border-left:4px solid #2f6f65;font-size:12px;line-height:1.7}
@@ -632,7 +632,7 @@ body.manual-open{overflow:hidden}
 .absi-z-score{font-size:19px;font-weight:900;color:#294f45}
 
 
-/* v54: 自宅体重グラフの出来事マーカー */
+/* v55: 自宅体重グラフの出来事マーカー */
 .event-legend-diamond{
   display:inline-block;width:auto!important;height:auto!important;background:none!important;
   color:#b34f3b;font-size:15px;font-weight:900;line-height:1
@@ -652,7 +652,7 @@ body.manual-open{overflow:hidden}
   white-space:pre-wrap;line-height:1.8;font-size:14px
 }
 
-/* v54: 外来薬剤経過 */
+/* v55: 外来薬剤経過 */
 .med-period-manager{
   margin-top:10px;padding:12px;border:1px solid #cfe0db;border-radius:14px;background:#f8fbfa
 }
@@ -675,7 +675,7 @@ body.manual-open{overflow:hidden}
   .med-period-stop{justify-content:flex-start}
 }
 
-/* v54: グラフ下の薬剤使用期間 */
+/* v55: グラフ下の薬剤使用期間 */
 .med-timeline{
   margin-top:15px;border-top:1px solid var(--line);padding-top:11px
 }
@@ -715,7 +715,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v54</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v55</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -1205,6 +1205,7 @@ body.manual-open{overflow:hidden}
       <button data-days="1825">5年</button>
       <button data-days="all">全期間</button>
     </div>
+    <div class="note" style="margin-top:-4px;margin-bottom:10px">表示期間は、保存されている<strong>最新の外来受診日</strong>を終点として計算します。</div>
 
     <div class="visit-chart-mode">
       <button id="visitChartSeparateBtn" type="button" class="small secondary active">別々に表示</button>
@@ -3238,6 +3239,22 @@ function dateRangeFilter(records,days){
   return records.filter(r=>{const d=new Date(r.date+"T12:00:00");return d>=start&&d<=end})
 }
 
+/* 外来グラフ用：
+   「1年／3年／5年」は今日を終点にせず、保存されている最新の受診日を終点にする。
+   これにより、試験入力などで今日より後の日付を入力した場合も、
+   1か月後・2か月後のデータをグラフと薬剤タイムラインに反映できる。 */
+function visitDateRangeFilter(records,days){
+  const rows=(records||[]).filter(r=>r&&r.date).sort((a,b)=>a.date.localeCompare(b.date));
+  if(days==="all"||!rows.length)return rows;
+  const latest=rows[rows.length-1].date;
+  const end=new Date(latest+"T12:00:00"),start=new Date(end);
+  start.setDate(start.getDate()-(Number(days)-1));
+  return rows.filter(r=>{
+    const d=new Date(r.date+"T12:00:00");
+    return d>=start&&d<=end
+  })
+}
+
 /* SVGグラフ */
 function svgEl(name,attrs={},text=""){
   const ns="http://www.w3.org/2000/svg",e=document.createElementNS(ns,name);
@@ -3903,7 +3920,7 @@ async function drawGaCharts(){
   const card=$("gaChartsCard");if(!card||card.style.display==="none")return;
   const all=await getAll(VISIT_STORE);
   {
-    const records=dateRangeFilter(all,selectedVisitPeriod).sort((a,b)=>a.date.localeCompare(b.date));
+    const records=visitDateRangeFilter(all,selectedVisitPeriod);
     const gaRows=records.filter(r=>r.ga!==null&&r.ga!==undefined&&Number.isFinite(Number(r.ga)));
     drawSimpleLineChart($("visitGAChart"),gaRows,[{key:"ga",color:"#4e82a8"}],"%",330,null);
     const estimated=gaRows.map(r=>({...r,estimatedHbA1c:gaToEstimatedHbA1c(r.ga)}));
@@ -4045,7 +4062,7 @@ function applyVisitChartModeUI(){
   $("visitChartCombinedBtn").classList.toggle("active",combined)
 }
 async function drawVisitCharts(){
-  const r=dateRangeFilter(await getAll(VISIT_STORE),selectedVisitPeriod);
+  const r=visitDateRangeFilter(await getAll(VISIT_STORE),selectedVisitPeriod);
   renderVisitEyeInfo();
   if($("egfrSlopeCard")?.style.display!=="none")await drawEgfrSlope();
   if($("gaChartsCard")?.style.display!=="none")await drawGaCharts();
@@ -4263,7 +4280,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:54,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:55,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
