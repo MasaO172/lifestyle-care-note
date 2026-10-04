@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v55</title>
+<title>生活習慣ケアノート v56</title>
 <style>
 :root{
   --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
@@ -572,7 +572,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v55: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+/* v56: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
 .photo-backup-box{
   margin-top:14px;
   border:2px solid #8eb7ac;
@@ -594,7 +594,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v55: SMBG範囲別割合（CGM風の参考表示） */
+/* v56: SMBG範囲別割合（CGM風の参考表示） */
 .smbg-range-wrap{margin-top:14px}
 .smbg-range-grid{
   display:grid;
@@ -621,7 +621,7 @@ body.manual-open{overflow:hidden}
 }
 
 
-/* v55: ABSI z-score（年齢・性別標準化） */
+/* v56: ABSI z-score（年齢・性別標準化） */
 .absi-z-panel{display:none;margin-top:8px;border:1px solid #c8ddd7;border-radius:12px;background:#f8fbfa;padding:11px 12px}
 .absi-z-panel .grid2{margin-top:8px}
 .absi-z-result{margin-top:9px;border-radius:10px;padding:9px 10px;background:#eef5f3;border-left:4px solid #2f6f65;font-size:12px;line-height:1.7}
@@ -632,7 +632,7 @@ body.manual-open{overflow:hidden}
 .absi-z-score{font-size:19px;font-weight:900;color:#294f45}
 
 
-/* v55: 自宅体重グラフの出来事マーカー */
+/* v56: 自宅体重グラフの出来事マーカー */
 .event-legend-diamond{
   display:inline-block;width:auto!important;height:auto!important;background:none!important;
   color:#b34f3b;font-size:15px;font-weight:900;line-height:1
@@ -652,7 +652,7 @@ body.manual-open{overflow:hidden}
   white-space:pre-wrap;line-height:1.8;font-size:14px
 }
 
-/* v55: 外来薬剤経過 */
+/* v56: 外来薬剤経過 */
 .med-period-manager{
   margin-top:10px;padding:12px;border:1px solid #cfe0db;border-radius:14px;background:#f8fbfa
 }
@@ -675,7 +675,7 @@ body.manual-open{overflow:hidden}
   .med-period-stop{justify-content:flex-start}
 }
 
-/* v55: グラフ下の薬剤使用期間 */
+/* v56: グラフ下の薬剤使用期間 */
 .med-timeline{
   margin-top:15px;border-top:1px solid var(--line);padding-top:11px
 }
@@ -708,6 +708,16 @@ body.manual-open{overflow:hidden}
   .med-timeline-label{font-size:10px}
 }
 
+
+/* v56: 薬剤使用期間をグラフ直上に配置 */
+.med-timeline.above-chart{
+  margin-top:8px;
+  margin-bottom:6px;
+  border-top:1px solid var(--line);
+  padding-top:8px;
+}
+.med-timeline.above-chart .med-timeline-note{margin-bottom:6px}
+
 </style>
 </head>
 <body>
@@ -715,7 +725,7 @@ body.manual-open{overflow:hidden}
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v55</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v56</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -1212,6 +1222,8 @@ body.manual-open{overflow:hidden}
       <button id="visitChartCombinedBtn" type="button" class="small secondary">体重＋HbA1cを同じグラフ</button>
     </div>
 
+    <div id="visitMedicationTimeline" class="med-timeline above-chart"></div>
+
     <div id="visitSeparateCharts" class="two-charts">
       <div>
         <h3 style="margin-top:0">体重</h3>
@@ -1246,12 +1258,12 @@ body.manual-open{overflow:hidden}
       </div>
       <div class="combined-chart-note">左軸は体重、右軸はHbA1cです。背景はHbA1cの右軸に対応し、6.0%未満を濃いめの青、6.0〜7.0%未満を薄い青、7.0〜8.0%未満を薄い黄色、8.0〜10.0%未満を薄い赤、10.0%以上を濃いめの赤で表示します。2本の線は左右で別スケールなので、線の傾きそのものを直接比較するのではなく、体重とHbA1cが同じ時期にどのように変化しているかを見るためのグラフです。</div>
     </div>
-    <div id="visitMedicationTimeline" class="med-timeline"></div>
   </div>
 
   <div class="card" id="gaChartsCard" style="display:none">
     <h2>グリコアルブミンの経過</h2>
     <div class="note" style="margin-top:-5px">外来記録でグリコアルブミンを表示項目として選択した場合に表示します。</div>
+    <div id="gaMedicationTimeline" class="med-timeline above-chart"></div>
     <h3>グリコアルブミン（GA）</h3>
     <div class="chart-wrap"><svg id="visitGAChart" viewBox="0 0 720 330" role="img" aria-label="グリコアルブミン推移グラフ"></svg></div>
     <h3>GAから換算した推定HbA1c</h3>
@@ -1264,7 +1276,6 @@ body.manual-open{overflow:hidden}
       <span><i style="background:#f2bcbc"></i>10.0%以上</span>
     </div>
     <div class="note" style="margin-top:8px">推定HbA1cは <strong>HbA1c = 0.216 × GA + 2.978</strong> で換算した参考値です（Kogaら, Endocr J 2014）。実測HbA1cの代わりではなく、GAとHbA1cの関係が変化する病態ではずれることがあります。</div>
-    <div id="gaMedicationTimeline" class="med-timeline"></div>
   </div>
 
   <div class="card egfr-slope-card" id="egfrSlopeCard">
@@ -1295,12 +1306,12 @@ body.manual-open{overflow:hidden}
     </div>
 
     <div id="egfrSlopeResult" class="egfr-result na">eGFRを2回以上入力するとスロープを算出します。</div>
+    <div id="egfrMedicationTimeline" class="med-timeline above-chart"></div>
     <div class="chart-wrap"><svg id="egfrSlopeChart" viewBox="0 0 720 360" role="img" aria-label="eGFRスロープグラフ"></svg></div>
     <div class="egfr-slope-legend">
       <span><i style="height:10px;width:10px;border-radius:50%;background:#2f6f65"></i>eGFR実測値</span>
       <span><i style="height:0;border-top:3px dashed #b3402f"></i>回帰直線</span>
     </div>
-    <div id="egfrMedicationTimeline" class="med-timeline"></div>
     <div class="egfr-slope-note">
       判定目安：年間低下が3 mL/min/1.73m²未満＝「安定」、3以上5未満＝「経過観察」、5以上＝「急速進行」。
       <strong>測定点が3点未満、または観察期間が6か月未満の場合は「参考値」</strong>として表示します。
@@ -4280,7 +4291,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:55,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:56,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
