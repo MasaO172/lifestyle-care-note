@@ -1,0 +1,716 @@
+
+:root{
+  --bg:#f4f7f6;--card:#fff;--ink:#1d2927;--muted:#687673;--accent:#2f6f65;
+  --accent2:#d07c39;--line:#dce5e2;--danger:#a93b3b;--soft:#e8f1ef;
+  --purple:#765a98;--blue:#487a9b;--shadow:0 6px 24px rgba(25,50,45,.08)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.55;padding-bottom:166px
+}
+header{
+  position:sticky;top:0;z-index:10;background:rgba(244,247,246,.94);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);padding:max(12px,env(safe-area-inset-top)) 16px 10px
+}
+.brand{display:flex;align-items:center;gap:10px;max-width:820px;margin:0 auto}
+.logo{width:40px;height:40px;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.logo img{width:100%;height:100%;display:block;object-fit:cover}
+h1{font-size:18px;margin:0}.subtitle{font-size:12px;color:var(--muted)}
+main{max-width:820px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:14px 0 8px}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+input,textarea,select{
+  width:100%;border:1px solid #cbd8d4;border-radius:12px;padding:12px;font:inherit;background:#fff;color:var(--ink)
+}
+input[type="number"]{font-variant-numeric:tabular-nums}
+textarea{min-height:72px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button{
+  border:0;border-radius:12px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;
+  background:var(--accent);color:white
+}
+button.secondary{background:var(--soft);color:var(--accent)}
+button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+button.danger{background:#fff0f0;color:var(--danger);border:1px solid #efcccc}
+button.small{padding:7px 10px;font-size:13px}
+.status{font-size:13px;color:var(--muted);margin-top:8px;min-height:1.4em}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.metric{background:#f7faf9;border:1px solid var(--line);border-radius:14px;padding:10px}
+.metric .k{font-size:11px;color:var(--muted)}
+.metric .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);padding:6px 4px max(6px,env(safe-area-inset-bottom));
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,auto);gap:2px
+}
+.tabs button{background:transparent;color:var(--muted);padding:10px 4px;font-size:13.5px;border-radius:10px;white-space:nowrap;min-height:52px;line-height:1.35}
+.tabs button.active{background:var(--soft);color:var(--accent)}
+.view{display:none}.view.active{display:block}
+.periods{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.periods button{background:#edf3f1;color:var(--accent);padding:7px 10px;font-size:12px}
+.periods button.active{background:var(--accent);color:#fff}
+.chart-wrap{background:#fbfdfc;border:1px solid var(--line);border-radius:14px;padding:8px;overflow:hidden}
+svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:4px;border-radius:3px}
+.history-item,.visit-item{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px;background:#fff}
+.history-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.history-date{font-weight:800}.history-weight{font-variant-numeric:tabular-nums}
+.history-meals,.visit-sub{font-size:12px;color:var(--muted);margin-top:5px}
+.history-meals{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note{font-size:12px;color:var(--muted)}
+.privacy{background:#eef5f3;border-left:4px solid var(--accent);padding:10px 12px;border-radius:10px;font-size:12px}
+.warning{background:#fff8e9;border-left:4px solid #d59a36;padding:10px 12px;border-radius:10px;font-size:12px}
+.toggle{display:flex;gap:8px;align-items:center}.toggle input{width:auto}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.install-tip{font-size:12px;color:var(--muted);margin-top:8px}
+
+.visit-field-hidden{display:none!important}
+.field-picker{margin-top:10px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fbfdfc}
+.field-picker-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px}
+.field-picker-option{display:flex;align-items:flex-start;gap:7px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px}
+.field-picker-option input{width:auto;margin-top:2px}
+.visit-field-summary{font-size:12px;color:var(--muted);margin-top:8px}
+.visit-field-summary strong{color:var(--accent)}
+
+.daily-measure-hidden{display:none!important}
+.daily-measure-summary{font-size:12px;color:var(--muted);margin:8px 0 0}
+.daily-measure-summary strong{color:var(--accent)}
+
+.meal-photo-block{margin:7px 0 14px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fbfdfc}
+.meal-photo-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:7px}
+.photo-file-label{display:inline-flex;align-items:center;gap:6px;border-radius:11px;padding:8px 11px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:800;cursor:pointer}
+.photo-file-label input{display:none}
+.meal-photo-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:9px}
+.meal-photo-gallery:empty{display:none}
+.meal-photo-card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px;min-width:0}
+.meal-photo-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;background:#eef2f1;cursor:zoom-in}
+.meal-photo-card-meta{font-size:10.5px;color:var(--muted);line-height:1.45;margin-top:5px}
+.meal-photo-card .photo-delete-one{width:100%;margin-top:5px;padding:5px 7px;font-size:10px}
+.meal-photo-count{font-size:11px;color:var(--muted);font-weight:700}
+.history-photo-row{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px}
+.history-photo-thumb{position:relative;flex:0 0 auto}
+.history-photo-thumb img{width:70px;height:54px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.history-photo-thumb span{position:absolute;left:3px;bottom:3px;background:rgba(0,0,0,.62);color:#fff;border-radius:5px;padding:1px 4px;font-size:9px}
+.photo-storage-box{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fbfdfc;margin-top:10px}
+.storage-bar{height:9px;background:#e8eeec;border-radius:99px;overflow:hidden;margin:7px 0}
+.storage-bar>div{height:100%;background:var(--accent);width:0%;transition:width .2s}
+.storage-bar.warn>div{background:#d59a36}.storage-bar.danger>div{background:#b94a48}
+.photo-status{font-size:11px;color:var(--muted);margin-top:5px}
+.photo-modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.86);display:none;align-items:center;justify-content:center;padding:18px}
+.photo-modal.open{display:flex}
+.photo-modal img{max-width:100%;max-height:82vh;border-radius:12px;background:#111}
+.photo-modal-close{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px;border-radius:999px;background:rgba(255,255,255,.92);color:#222;padding:8px 12px}
+.photo-modal-caption{position:absolute;left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom));color:#fff;text-align:center;font-size:13px}
+
+.meal-review-selected{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.review-selected-card{border:2px solid var(--line);border-radius:14px;padding:11px;background:#fbfdfc;min-width:0}
+.review-selected-card.good{border-color:#78b69e;background:#f1faf6}
+.review-selected-card.improve{border-color:#d9ab62;background:#fff9ee}
+.review-selected-title{font-size:13px;font-weight:850;margin-bottom:6px}
+.review-selected-card.good .review-selected-title{color:#267157}
+.review-selected-card.improve .review-selected-title{color:#96631c}
+.review-empty{font-size:12px;color:var(--muted);padding:12px;border:1px dashed var(--line);border-radius:10px;background:#fff}
+.review-list{display:grid;gap:10px;margin-top:12px}
+.review-meal-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:11px}
+.review-meal-card.is-good{border:2px solid #78b69e;background:#f6fcf9}
+.review-meal-card.is-improve{border:2px solid #d9ab62;background:#fffaf1}
+.review-meal-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.review-meal-date{font-size:14px;font-weight:850;color:var(--accent)}
+.review-meal-text{font-size:12px;color:#52635e;margin:6px 0;white-space:pre-wrap}
+.review-thumbs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+.review-thumb{position:relative;min-width:0}
+.review-thumb img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:9px;border:1px solid var(--line);cursor:zoom-in;background:#eef2f1}
+.review-more{position:absolute;right:4px;bottom:4px;background:rgba(0,0,0,.68);color:#fff;border-radius:999px;padding:2px 6px;font-size:10px;font-weight:800}
+.review-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.review-actions button{font-size:11px;padding:7px 9px}
+.review-good-btn{background:#e9f7f0!important;color:#267157!important;border:1px solid #acd6c3!important}
+.review-improve-btn{background:#fff5e5!important;color:#8b5b18!important;border:1px solid #e5c58f!important}
+.review-selected-photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:7px}
+.review-selected-photos img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--line);cursor:zoom-in}
+.review-note{font-size:11px;color:var(--muted);line-height:1.6;margin-top:7px}
+
+
+
+
+
+.section-label{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--accent);margin:18px 0 7px}
+.lab-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lab-chip{background:#f7faf9;border:1px solid var(--line);border-radius:12px;padding:8px}
+.lab-chip .n{font-size:10px;color:var(--muted)}.lab-chip .x{font-weight:800;font-size:14px}
+details.knowledge{border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:9px;overflow:hidden}
+details.knowledge summary{cursor:pointer;list-style:none;padding:14px;font-weight:800;display:flex;align-items:center;gap:9px}
+details.knowledge summary::-webkit-details-marker{display:none}
+details.knowledge[open] summary{border-bottom:1px solid var(--line);background:#fbfdfc}
+.kbody{padding:14px;font-size:14px}
+.kbody p:first-child{margin-top:0}.kbody p:last-child{margin-bottom:0}
+.kbody ul{padding-left:1.25em}
+.bmi-row{display:grid;grid-template-columns:1.2fr .8fr;gap:8px;padding:7px 0;border-bottom:1px solid #edf2f0}
+.bmi-row:last-child{border-bottom:0}
+.goal-box{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid #edf2f0}
+.goal-box:last-child{border-bottom:0}.goal-box strong{color:var(--accent)}
+
+.diabetes-lead{background:#f2f8fc;border:1px solid #c9dfea;border-radius:13px;padding:12px 13px;line-height:1.75}
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.comp-card{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fbfdfc}
+.comp-card h4{margin:0 0 8px;font-size:14px;color:var(--accent)}
+.comp-card ul{margin:7px 0 0;padding-left:1.2em}
+.comp-card li{margin:5px 0}
+.eye-alert{background:#fff8e8;border:1px solid #ead39f;border-radius:12px;padding:11px 12px;margin:10px 0;font-size:13px;line-height:1.7}
+.patient-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:10px 0}
+.patient-table{width:100%;border-collapse:collapse;min-width:620px;font-size:12px;background:#fff}
+.patient-table th,.patient-table td{border:1px solid #dfe8e5;padding:9px 8px;vertical-align:top;line-height:1.55}
+.patient-table th{background:#eef6f3;color:#244f48;font-weight:800}
+.patient-table td strong{color:#244f48}
+.target-main{font-size:16px;font-weight:850;color:#17614b;white-space:nowrap}
+.source-box{font-size:11px;color:#5f6f6a;background:#f7faf9;border:1px solid var(--line);border-radius:11px;padding:10px 11px;margin-top:10px;line-height:1.7}
+.source-box a{color:#245f7a;text-decoration:underline;overflow-wrap:anywhere}
+.diabetes-subhead{font-size:15px;font-weight:850;color:#315c70;margin:18px 0 7px}
+.hba1c-box{background:#f7faf9;border-left:5px solid #6fa9c5;border-radius:10px;padding:11px 12px;line-height:1.75}
+.elder-category{font-size:11px;line-height:1.55}
+
+.knowledge-group-header{margin:18px 0 10px;border-radius:15px;padding:14px 15px;border:1px solid var(--line)}
+.knowledge-group-header.diabetes{background:#eef7fb;border-color:#c9dfea}
+.knowledge-group-header.obesity{background:#f2f8f4;border-color:#cce1d6}
+.knowledge-group-header h3{margin:0 0 5px;font-size:17px}
+.knowledge-group-header.diabetes h3{color:#315f76}
+.knowledge-group-header.obesity h3{color:#2e6652}
+.knowledge-group-header p{margin:0;font-size:12px;line-height:1.7;color:#53645f}
+.shared-care-box{background:#fffaf0;border:1px solid #ead9ae;border-radius:12px;padding:11px 12px;margin:10px 0;font-size:12px;line-height:1.7}
+
+.weight-trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.weight-trend-card{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fbfdfc}
+.weight-trend-card h3{margin:0 0 8px;color:var(--accent);font-size:15px}
+.weight-trend-card .summary{grid-template-columns:repeat(3,1fr);gap:7px}
+.weight-trend-card .metric{padding:10px 7px}
+.weight-trend-card .metric .k{font-size:10px}
+.weight-trend-card .metric .v{font-size:18px}
+.weight-trend-meta{font-size:11px;color:var(--muted);line-height:1.55;margin-top:7px}
+.knowledge-group-header.lipid{background:#fff7ed;border-color:#ead6b7}
+.knowledge-group-header.lipid h3{color:#8a5d20}
+.knowledge-group-header.mash{background:#f8f4ec;border-color:#ddd2b8}
+.knowledge-group-header.mash h3{color:#6e5a28}
+.knowledge-group-header.osas{background:#f3f2fb;border-color:#d8d3ec}
+.knowledge-group-header.osas h3{color:#5f528a}
+.diet-advice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:10px 0}
+.diet-advice-card{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+.diet-advice-card h4{margin:0 0 7px;font-size:13px;color:var(--accent)}
+.diet-advice-card ul{margin:0;padding-left:1.15em}
+.diet-advice-card li{margin:5px 0;font-size:12px;line-height:1.6}
+
+
+
+.badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;background:var(--soft);color:var(--accent);font-weight:700}
+.bmi-result{margin-top:10px;padding:10px;background:#f7faf9;border-radius:12px;font-size:13px}
+fieldset{border:0;padding:0;margin:0}
+.two-charts{display:grid;grid-template-columns:1fr;gap:12px}
+
+.visit-chart-mode{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}
+.visit-chart-mode button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.combined-chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#5d6c68;margin:8px 0 2px}
+.combined-chart-legend span{display:inline-flex;align-items:center;gap:5px}
+.combined-chart-legend i{display:inline-block;width:22px;height:3px;border-radius:3px}
+.combined-chart-note{font-size:11px;line-height:1.6;color:var(--muted);margin-top:7px}
+
+
+@media(max-width:620px){
+  .weight-trend-grid{grid-template-columns:1fr}
+  .diet-advice-grid{grid-template-columns:1fr}
+  .comp-grid{grid-template-columns:1fr}
+  .meal-photo-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .meal-review-selected{grid-template-columns:1fr}
+  .review-thumbs,.review-selected-photos{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid2,.grid3,.grid4,.lab-grid,.tx-checkgrid{grid-template-columns:1fr 1fr}
+  .summary{grid-template-columns:1fr 1fr 1fr}
+  main{padding:10px}.card{padding:14px;border-radius:16px}
+  .tabs button{font-size:9.5px}
+}
+@media(max-width:390px){
+  .lab-grid,.tx-checkgrid{grid-template-columns:1fr}
+  .field-picker-grid{grid-template-columns:1fr}
+  .tabs button{font-size:9px;padding-left:0;padding-right:0}
+}
+
+/* v25: 減量メダル */
+.reward-time-buttons{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 12px}
+.reward-time-buttons button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.reward-status{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fbfdfc;margin-bottom:12px}
+.reward-status-top{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.reward-big{font-size:26px;font-weight:900;color:var(--accent);line-height:1.15}
+.reward-sub{font-size:11px;color:var(--muted);line-height:1.6;margin-top:4px}
+.reward-progress{height:10px;border-radius:999px;background:#e8efec;overflow:hidden;margin-top:10px}
+.reward-progress>div{height:100%;background:linear-gradient(90deg,#7ca99c,#2f6f65);border-radius:999px;transition:width .25s ease}
+.reward-medals{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:10px}
+.reward-medal{min-width:0;text-align:center;border:1px solid var(--line);border-radius:12px;padding:8px 3px;background:#f5f7f6;color:#9aa5a1}
+.reward-medal .reward-icon{font-size:19px;line-height:1.15;filter:grayscale(1);opacity:.45}
+.reward-medal .reward-pct{font-size:11px;font-weight:800;margin-top:3px}
+.reward-medal.earned{background:#fff;border-color:#cbd9d4;color:#385e54}
+.reward-medal.earned .reward-icon{filter:none;opacity:1}
+.reward-medal.special{border-width:2px}
+.reward-medal.special.earned{background:#fff9e9;border-color:#dfc36e}
+.reward-medal.special .reward-icon{font-size:24px}
+.reward-warning{border:1px solid #e5b4aa;background:#fff2ef;color:#842f25;border-radius:13px;padding:12px;font-size:12px;line-height:1.7;margin:10px 0}
+.reward-info{border:1px solid #d9e3df;background:#f7faf9;border-radius:13px;padding:11px;font-size:11px;line-height:1.7;color:#586a65}
+@media(max-width:620px){.reward-medals{grid-template-columns:repeat(5,1fr)}.reward-big{font-size:23px}}
+
+
+.reward-details{padding:0;overflow:hidden}
+.reward-details>summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:900;font-size:16px;color:var(--accent);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.reward-details>summary::-webkit-details-marker{display:none}
+.reward-details>summary::after{content:"＋";font-size:22px;line-height:1;color:var(--muted)}
+.reward-details[open]>summary::after{content:"−"}
+.reward-details-body{padding:0 18px 18px}
+.reward-caution{border:1px solid #e5cf91;background:#fff9e7;color:#6e581c;border-radius:13px;padding:12px;font-size:12px;line-height:1.7;margin:10px 0}
+
+
+.smbg-series-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:7px}
+.smbg-series-legend span{display:inline-flex;align-items:center;gap:5px}
+.smbg-series-legend i{display:inline-block;width:16px;height:3px;border-radius:3px}
+
+/* v29: 著作権・ライセンス表示 */
+.copyright-box{
+  border:2px solid #c84f16;
+  background:#fff8ef;
+  border-radius:16px;
+  padding:18px 16px;
+  text-align:center;
+  color:#7d2d0d;
+  line-height:1.75;
+  font-size:12px;
+}
+.copyright-box .copyright-main{
+  font-weight:900;
+  font-size:15px;
+  line-height:1.55;
+}
+.copyright-box .copyright-license{
+  font-weight:800;
+  font-size:14px;
+  margin-top:2px;
+}
+.copyright-box .copyright-text{
+  font-weight:700;
+  margin-top:7px;
+}
+.copyright-box a{
+  color:#0645d4;
+  text-decoration:underline;
+  font-weight:800;
+}
+@media(max-width:620px){
+  .copyright-box{padding:15px 12px;font-size:11px}
+  .copyright-box .copyright-main{font-size:14px}
+  .copyright-box .copyright-license{font-size:13px}
+}
+
+
+/* v30: 血糖自己測定の平均値 */
+.smbg-average-wrap{margin-top:14px}
+.smbg-average-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.smbg-average-card{border:1px solid var(--line);border-radius:12px;background:#fbfdfc;padding:10px 8px;text-align:center;min-width:0}
+.smbg-average-label{font-size:11px;font-weight:800;color:#586a65;white-space:nowrap}
+.smbg-average-value{font-size:19px;font-weight:900;color:#2f5149;line-height:1.25;margin-top:3px}
+.smbg-average-unit{font-size:10px;font-weight:700;color:#788783}
+.smbg-average-n{font-size:10px;color:#8a9894;margin-top:2px}
+@media(max-width:620px){
+  .smbg-average-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+
+/* v31: 排便記録 */
+.bowel-field{
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fbfdfc;
+  padding:11px 12px;
+  margin-top:10px;
+}
+.bowel-legend-star{
+  display:inline-block;
+  width:auto !important;
+  height:auto !important;
+  background:none !important;
+  font-size:18px;
+  line-height:1;
+  color:#8d5a3b;
+  font-weight:900;
+  vertical-align:-1px;
+}
+
+
+/* v34: 外来HbA1cグラフの背景区分 */
+.hba1c-zone-legend{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:8px;
+}
+.hba1c-zone-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+}
+.hba1c-zone-legend i{
+  display:inline-block;
+  width:18px;
+  height:10px;
+  border:1px solid rgba(0,0,0,.06);
+  border-radius:3px;
+}
+
+
+/* v35: 自宅血圧・眼科記録・5タブナビ */
+.tabs{grid-template-columns:repeat(5,1fr)}
+.tabs button{font-size:11px}
+.bp-pair-wrap{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fbfdfc}
+.bp-pair-title{font-weight:900;color:var(--accent);margin-bottom:7px}
+.bp-pair{display:grid;grid-template-columns:minmax(0,1.18fr) 24px minmax(0,1fr);align-items:center;gap:5px}
+.bp-pair .slash{font-size:27px;font-weight:900;line-height:1;text-align:center;color:#345b52}
+.bp-pair input{text-align:center;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.bp-pair-labels{display:grid;grid-template-columns:minmax(0,1.18fr) 24px minmax(0,1fr);gap:5px;margin-top:4px;font-size:10px;color:var(--muted);text-align:center}
+.chart-details{padding:0;overflow:hidden}
+.chart-details>summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:900;font-size:16px;color:var(--accent);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.chart-details>summary::-webkit-details-marker{display:none}
+.chart-details>summary::after{content:"＋";font-size:22px;color:var(--muted)}
+.chart-details[open]>summary::after{content:"−"}
+.chart-details-body{padding:0 18px 18px}
+.bp-average-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.bp-average-card{border:1px solid var(--line);border-radius:12px;background:#fbfdfc;padding:10px 8px;text-align:center;min-width:0}
+.bp-average-label{font-size:11px;font-weight:800;color:#586a65}
+.bp-average-value{font-size:19px;font-weight:900;color:#2f5149;line-height:1.25;margin-top:3px}
+.bp-average-unit,.bp-average-n{font-size:10px;color:#788783}
+.eye-summary{margin-top:8px}
+.eye-record-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px}
+.eye-record-grid>div{padding:9px;border-bottom:1px solid var(--line);background:#fff;min-width:0}
+.eye-record-grid>div:nth-child(3n+1){font-weight:800;background:#f7faf9}
+.eye-record-grid .head{font-weight:900;background:#eaf2ef;text-align:center;color:var(--accent)}
+.eye-record-grid input,.eye-record-grid select{padding:8px 7px;font-size:12px}
+.eye-record-grid .last-row{border-bottom:0}
+.eye-list-item{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px;background:#fff}
+.eye-list-title{font-weight:900}
+.eye-list-detail{font-size:12px;color:var(--muted);line-height:1.7;margin-top:5px}
+.menu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.menu-tile{background:#fff;color:var(--ink);border:1px solid var(--line);padding:16px 12px;text-align:left;min-height:86px}
+.menu-tile strong{display:block;color:var(--accent);font-size:15px;margin-bottom:5px}
+.menu-tile span{display:block;font-size:11px;color:var(--muted);font-weight:500;line-height:1.5}
+@media(max-width:620px){
+  .bp-average-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .eye-record-grid{grid-template-columns:1.05fr 1fr 1fr}
+  .eye-record-grid>div{padding:7px 5px;font-size:11px}
+  .eye-record-grid input,.eye-record-grid select{font-size:11px;padding:7px 5px}
+}
+
+
+/* v38: 高齢の方にも見やすい大きめの2段タブ */
+@media(max-width:620px){
+  body{padding-bottom:168px}
+  .tabs{padding:6px 4px max(7px,env(safe-area-inset-bottom));gap:3px}
+  .tabs button{
+    font-size:13px;
+    padding:9px 3px;
+    border-radius:10px;
+    min-width:0;
+    min-height:51px;
+    line-height:1.35;
+    font-weight:800
+  }
+}
+@media(max-width:390px){
+  body{padding-bottom:164px}
+  .tabs button{
+    font-size:12.5px;
+    padding:8px 2px;
+    min-height:49px;
+    letter-spacing:0
+  }
+}
+/* 外来経過グラフ内の眼科受診情報 */
+.visit-eye-info{
+  margin:8px 0 12px;
+  padding:9px 11px;
+  border:1px solid #cfe0eb;
+  background:#f3f9fc;
+  border-radius:11px;
+  color:#405a69;
+  font-size:11.5px;
+  line-height:1.6;
+}
+.visit-eye-info strong{color:#244b60}
+
+
+/* v39: v35由来の古いタブ列指定を上書きし、4列×2段を確実に維持 */
+.tabs{
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  grid-template-rows:repeat(2,auto);
+}
+
+/* v39: eGFRスロープ */
+.egfr-slope-card{display:none}
+.egfr-slope-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin:10px 0 12px;
+}
+.egfr-slope-metric{
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#fbfdfc;
+  padding:10px 8px;
+  text-align:center;
+  min-width:0;
+}
+.egfr-slope-metric .k{font-size:10.5px;color:var(--muted);font-weight:800}
+.egfr-slope-metric .v{font-size:18px;color:#2f5149;font-weight:900;line-height:1.25;margin-top:4px;word-break:break-word}
+.egfr-slope-metric .u{font-size:9.5px;color:#788783;margin-top:2px}
+.egfr-result{
+  border-radius:12px;
+  padding:10px 12px;
+  margin:8px 0 10px;
+  font-size:12px;
+  line-height:1.7;
+  border:1px solid var(--line);
+}
+.egfr-result.stable{background:#eef8f1;color:#285d3c;border-color:#cfe5d6}
+.egfr-result.watch{background:#fff8e2;color:#725819;border-color:#ead8a4}
+.egfr-result.rapid{background:#fff0ee;color:#87372e;border-color:#e9beb8}
+.egfr-result.reference{box-shadow:inset 4px 0 0 #8a9894}
+.egfr-result.na{background:#f5f7f6;color:#667773}
+.egfr-slope-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:8px}
+.egfr-slope-legend span{display:inline-flex;align-items:center;gap:5px}
+.egfr-slope-legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.egfr-slope-note{font-size:11px;line-height:1.7;color:var(--muted);margin-top:9px}
+@media(max-width:620px){
+  .egfr-slope-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .egfr-slope-metric .v{font-size:17px}
+}
+
+
+/* v40: 血糖70 mg/dL未満の時間帯別回数 */
+.smbg-low-wrap{margin-top:14px}
+.smbg-low-total{
+  border:1px solid #efcaca;
+  background:#fff3f3;
+  border-radius:12px;
+  padding:10px 12px;
+  color:#8a3b3b;
+  font-size:12px;
+  line-height:1.6;
+  margin-top:8px;
+}
+.smbg-low-total strong{font-size:18px}
+.smbg-low-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin-top:8px;
+}
+.smbg-low-card{
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fbfdfc;
+  padding:10px 8px;
+  text-align:center;
+  min-width:0;
+}
+.smbg-low-card.has-low{
+  border-color:#efcaca;
+  background:#fff5f5;
+}
+.smbg-low-label{font-size:11px;font-weight:800;color:#586a65;white-space:nowrap}
+.smbg-low-value{font-size:20px;font-weight:900;color:#536661;line-height:1.25;margin-top:3px}
+.smbg-low-card.has-low .smbg-low-value{color:#a23e3e}
+.smbg-low-n{font-size:10px;color:#8a9894;margin-top:2px}
+@media(max-width:620px){
+  .smbg-low-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+
+.manual-viewer{
+  position:fixed;inset:0;z-index:2000;background:rgba(244,247,246,.98);
+  display:none;overflow:auto;-webkit-overflow-scrolling:touch
+}
+.manual-viewer.open{display:block}
+.manual-viewer-inner{max-width:920px;margin:0 auto;padding:16px 14px 28px}
+.manual-viewer-bar{
+  position:sticky;top:0;z-index:2;background:rgba(244,247,246,.96);
+  display:flex;align-items:center;gap:12px;justify-content:space-between;
+  padding:6px 0 10px;border-bottom:1px solid var(--line);backdrop-filter:blur(6px)
+}
+.manual-viewer-title{font-size:18px;font-weight:900;color:var(--accent)}
+.manual-viewer-note{font-size:12px;color:var(--muted);margin:10px 0 12px}
+.manual-viewer-pages{display:flex;flex-direction:column;gap:14px}
+.manual-page{
+  width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;box-shadow:var(--shadow)
+}
+.manual-page img{display:block;width:100%;height:auto}
+body.manual-open{overflow:hidden}
+@media(max-width:620px){
+  .manual-viewer-inner{padding:12px 10px 24px}
+  .manual-viewer-title{font-size:16px}
+}
+
+
+/* v57: 写真を含む完全バックアップ 写真を含むバックアップ（写真を含む） */
+.photo-backup-box{
+  margin-top:14px;
+  border:2px solid #8eb7ac;
+  background:#f2f8f6;
+  border-radius:14px;
+  padding:13px;
+}
+.photo-backup-title{
+  font-weight:900;
+  color:#2f6f65;
+  font-size:14px;
+  margin-bottom:5px;
+}
+.photo-backup-box .note{line-height:1.7}
+.photo-backup-size{
+  margin-top:7px;
+  font-size:11px;
+  color:#6f807b;
+}
+
+
+/* v57: SMBG範囲別割合（CGM風の参考表示） */
+.smbg-range-wrap{margin-top:14px}
+.smbg-range-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:8px;
+}
+.smbg-range-card{
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:11px 8px;
+  text-align:center;
+  min-width:0;
+}
+.smbg-range-card.tbr{background:#fdeaea;border-color:#efcaca}
+.smbg-range-card.tir{background:#e9f7ee;border-color:#c8e5d2}
+.smbg-range-card.tar{background:#fff7d6;border-color:#eadca8}
+.smbg-range-label{font-size:12px;font-weight:900;color:#485a55}
+.smbg-range-value{font-size:24px;font-weight:900;line-height:1.2;margin-top:4px;color:#294f45}
+.smbg-range-def{font-size:10px;font-weight:700;color:#697a75;margin-top:2px}
+.smbg-range-n{font-size:10px;color:#7e8e89;margin-top:3px}
+@media(max-width:430px){
+  .smbg-range-grid{grid-template-columns:1fr}
+}
+
+
+/* v57: ABSI z-score（年齢・性別標準化） */
+.absi-z-panel{display:none;margin-top:8px;border:1px solid #c8ddd7;border-radius:12px;background:#f8fbfa;padding:11px 12px}
+.absi-z-panel .grid2{margin-top:8px}
+.absi-z-result{margin-top:9px;border-radius:10px;padding:9px 10px;background:#eef5f3;border-left:4px solid #2f6f65;font-size:12px;line-height:1.7}
+.absi-z-result.high{background:#fff6e2;border-left-color:#c28a2e}
+.absi-z-result.very-high{background:#fff0ee;border-left-color:#b04a3c}
+.absi-z-result.low{background:#eef5fb;border-left-color:#4f7c9c}
+.absi-z-result.very-low{background:#e9f1fa;border-left-color:#365f86}
+.absi-z-score{font-size:19px;font-weight:900;color:#294f45}
+
+
+/* v57: 自宅体重グラフの出来事マーカー */
+.event-legend-diamond{
+  display:inline-block;width:auto!important;height:auto!important;background:none!important;
+  color:#b34f3b;font-size:15px;font-weight:900;line-height:1
+}
+.home-event-overlay{
+  position:fixed;inset:0;z-index:2300;background:rgba(20,32,28,.38);
+  display:none;align-items:center;justify-content:center;padding:18px
+}
+.home-event-overlay.open{display:flex}
+.home-event-card{
+  width:min(520px,100%);max-height:76vh;overflow:auto;background:#fff;border-radius:18px;
+  box-shadow:0 18px 55px rgba(0,0,0,.24);padding:17px
+}
+.home-event-date{font-weight:900;color:var(--accent);font-size:17px}
+.home-event-text{
+  margin-top:10px;padding:12px;border-radius:12px;background:#fff7f3;border-left:5px solid #b34f3b;
+  white-space:pre-wrap;line-height:1.8;font-size:14px
+}
+
+/* v57: 外来薬剤経過 */
+.med-period-manager{
+  margin-top:10px;padding:12px;border:1px solid #cfe0db;border-radius:14px;background:#f8fbfa
+}
+.med-period-manager h3{margin-top:0;color:var(--accent)}
+.med-period-add{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(130px,.8fr) auto;gap:8px;align-items:end}
+.med-period-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.med-period-item{
+  border:1px solid var(--line);border-radius:11px;background:#fff;padding:9px 10px;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center
+}
+.med-period-name{font-weight:900;color:#334d46}
+.med-period-dates{font-size:11px;color:var(--muted);margin-top:2px}
+.med-period-stop{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.med-period-stop input{width:145px;padding:7px 6px;font-size:11px}
+.med-period-history details{margin-top:9px}
+.med-period-history summary{cursor:pointer;font-weight:800;color:var(--accent)}
+@media(max-width:620px){
+  .med-period-add{grid-template-columns:1fr}
+  .med-period-item{grid-template-columns:1fr}
+  .med-period-stop{justify-content:flex-start}
+}
+
+/* v57: グラフ下の薬剤使用期間 */
+.med-timeline{
+  margin-top:15px;border-top:1px solid var(--line);padding-top:11px
+}
+.med-timeline-title{font-weight:900;color:var(--accent);font-size:13px}
+.med-timeline-note{font-size:10.5px;color:var(--muted);margin:3px 0 9px;line-height:1.55}
+.med-timeline-row{
+  display:grid;grid-template-columns:minmax(82px,145px) minmax(0,1fr);gap:9px;align-items:center;
+  margin:7px 0
+}
+.med-timeline-label{font-size:11px;font-weight:800;color:#40534d;overflow-wrap:anywhere}
+.med-timeline-label small{display:block;font-size:9px;font-weight:600;color:#87948f}
+.med-timeline-track{
+  height:22px;position:relative;background:#f2f5f4;border-radius:7px;overflow:hidden;
+  border:1px solid #e2e9e6
+}
+.med-timeline-bar{
+  position:absolute;top:8px;height:6px;border-radius:5px;min-width:5px
+}
+.med-timeline-dot{
+  position:absolute;top:5px;width:12px;height:12px;border-radius:50%;transform:translateX(-6px);
+  border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.12)
+}
+.med-timeline-arrow{
+  position:absolute;top:4px;transform:translateX(-7px);font-size:12px;font-weight:900
+}
+.med-timeline-axis{display:flex;justify-content:space-between;margin-left:154px;font-size:9px;color:#8b9894}
+@media(max-width:620px){
+  .med-timeline-row{grid-template-columns:88px minmax(0,1fr);gap:6px}
+  .med-timeline-axis{margin-left:94px}
+  .med-timeline-label{font-size:10px}
+}
+
+
+/* v57: 薬剤使用期間をグラフ直上に配置 */
+.med-timeline.above-chart{
+  margin-top:8px;
+  margin-bottom:6px;
+  border-top:1px solid var(--line);
+  padding-top:8px;
+}
+.med-timeline.above-chart .med-timeline-note{margin-bottom:6px}
+
+
+
+/* v57: security-hardened backup UI */
+.encrypted-backup-box{
+  margin-top:14px;border:2px solid #879db7;background:#f4f7fb;border-radius:14px;padding:13px
+}
+.encrypted-backup-title{font-weight:900;color:#405d7d;font-size:14px;margin-bottom:5px}
+.encrypted-backup-box input[type="password"]{background:#fff}
