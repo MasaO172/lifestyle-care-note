@@ -1241,6 +1241,45 @@ function svgEl(name,attrs={},text=""){
   Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(text)e.textContent=text;return e
 }
 
+function weightAxisBounds(values){
+  if(!values.length)return {min:0,max:2};
+  let low=Math.min(...values),high=Math.max(...values);
+  const spread=high-low;
+  const pad=Math.max(1,spread*.18);
+  let min=Math.floor(low-pad),max=Math.ceil(high+pad);
+  if(max-min<2){min-=1;max+=1}
+  return {min,max}
+}
+function clearWeightValueTooltip(svg){
+  svg.querySelectorAll(".weight-point-value").forEach(el=>el.remove())
+}
+function showWeightValueTooltip(svg,x,y,value,date,label="体重"){
+  clearWeightValueTooltip(svg);
+  const W=720,boxW=126,boxH=43;
+  let bx=Math.max(4,Math.min(W-boxW-4,x-boxW/2));
+  let by=y-boxH-13;
+  if(by<4)by=y+13;
+  const g=svgEl("g",{class:"weight-point-value","aria-hidden":"true"});
+  g.appendChild(svgEl("rect",{x:bx,y:by,width:boxW,height:boxH,rx:"9",fill:"#ffffff",stroke:"#40524e","stroke-width":"1.5"}));
+  g.appendChild(svgEl("text",{x:bx+boxW/2,y:by+20,"text-anchor":"middle",fill:"#263a35","font-size":"16","font-weight":"900"},`${Number(value).toFixed(1)} kg`));
+  g.appendChild(svgEl("text",{x:bx+boxW/2,y:by+35,"text-anchor":"middle",fill:"#667571","font-size":"10.5","font-weight":"700"},`${String(date).slice(5).replace("-","/")} ${label}`));
+  svg.appendChild(g)
+}
+function makeWeightPointInteractive(svg,c,x,y,value,date,label="体重"){
+  c.setAttribute("role","button");
+  c.setAttribute("tabindex","0");
+  c.setAttribute("aria-label",`${date} ${label} ${Number(value).toFixed(1)} kg`);
+  c.style.cursor="pointer";
+  // Visible point stays compact; add a generous transparent hit area for touch.
+  const hit=svgEl("circle",{cx:x,cy:y,r:"13",fill:"transparent",role:"button",tabindex:"0","aria-label":`${date} ${label} ${Number(value).toFixed(1)} kg`});
+  hit.style.cursor="pointer";
+  const activate=()=>showWeightValueTooltip(svg,x,y,value,date,label);
+  hit.addEventListener("click",activate);c.addEventListener("click",activate);
+  hit.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate()}});
+  c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate()}});
+  svg.appendChild(hit)
+}
+
 function drawHbA1cBackgroundBands(svg,yFor,yMin,yMax,L,R,W){
   const bands=[
     {lo:yMin,hi:Math.min(6,yMax),fill:"#c9e2f7"},
@@ -1296,13 +1335,18 @@ function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,date
       const xFor=date=>dates.length===1?(L+W-R)/2:L+dates.indexOf(date)/Math.max(1,dates.length-1)*(W-L-R);
       eventRows.forEach(r=>addHomeEventMarker(svg,xFor(r.date),height/2+25,r.date,r[eventKey]));
       const ticks=Math.min(6,dates.length);
-      for(let i=0;i<ticks;i++){const idx=Math.round(i*(dates.length-1)/Math.max(1,ticks-1)),d=dates[idx];svg.appendChild(svgEl("text",{x:xFor(d),y:H-20,"text-anchor":"middle",fill:"#788783","font-size":"12"},d.slice(5).replace("-","/")))}
+      for(let i=0;i<ticks;i++){const idx=Math.round(i*(dates.length-1)/Math.max(1,ticks-1)),d=dates[idx];svg.appendChild(svgEl("text",{x:xFor(d),y:H-20,"text-anchor":"middle",fill:"#40524e","font-size":"14","font-weight":"800"},d.slice(5).replace("-","/")))}
     }
     return
   }
   const W=720,H=height,L=58,R=18,T=20,B=48;
-  let min=Math.min(...values),max=Math.max(...values),pad=Math.max(unit==="%"?.3:1,(max-min)*.18);
-  min=min-pad;max=max+pad;if(max-min<(unit==="%"?1:2)){min-=.5;max+=.5}
+  let min,max;
+  if(unit==="kg"){
+    const axis=weightAxisBounds(values);min=axis.min;max=axis.max
+  }else{
+    const rawMin=Math.min(...values),rawMax=Math.max(...values),pad=Math.max(unit==="%"?.3:1,(rawMax-rawMin)*.18);
+    min=rawMin-pad;max=rawMax+pad;if(max-min<(unit==="%"?1:2)){min-=.5;max+=.5}
+  }
   if(backgroundType==="hba1c"){
     // HbA1cの5領域（<6, 6-7, 7-8, 8-10, >=10）が分かるよう表示範囲を確保
     min=Math.min(min,5.5);
@@ -1312,16 +1356,25 @@ function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,date
   const xFor=date=>dates.length===1?(L+W-R)/2:L+dates.indexOf(date)/(dates.length-1)*(W-L-R);
   const yFor=v=>T+(max-v)/(max-min)*(H-T-B);
   if(backgroundType==="hba1c")drawHbA1cBackgroundBands(svg,yFor,min,max,L,R,W);
-  for(let i=0;i<=5;i++){
-    const v=min+(max-min)*i/5,y=yFor(v);
-    svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#dfe7e4","stroke-width":"1"}));
-    svg.appendChild(svgEl("text",{x:L-8,y:y+4,"text-anchor":"end",fill:"#788783","font-size":"12"},unit==="%"?v.toFixed(1):v.toFixed(1)))
+  if(unit==="kg"){
+    // 体重は常に整数kg位置（例 65.0 kg）に1 kg刻みで横線を引く。
+    for(let v=Math.ceil(min);v<=Math.floor(max);v+=1){
+      const y=yFor(v);
+      svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#d7e1de","stroke-width":"1"}));
+      svg.appendChild(svgEl("text",{x:L-8,y:y+5,"text-anchor":"end",fill:"#40524e","font-size":"14","font-weight":"800"},v.toFixed(1)))
+    }
+  }else{
+    for(let i=0;i<=5;i++){
+      const v=min+(max-min)*i/5,y=yFor(v);
+      svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#dfe7e4","stroke-width":"1"}));
+      svg.appendChild(svgEl("text",{x:L-8,y:y+4,"text-anchor":"end",fill:"#788783","font-size":"12"},v.toFixed(1)))
+    }
   }
-  svg.appendChild(svgEl("text",{x:18,y:18,fill:"#788783","font-size":"12"},unit));
+  svg.appendChild(svgEl("text",{x:18,y:18,fill:unit==="kg"?"#40524e":"#788783","font-size":unit==="kg"?"14":"12","font-weight":unit==="kg"?"800":"500"},unit));
   const tickCount=Math.min(6,dates.length);
   for(let i=0;i<tickCount;i++){
     const idx=Math.round(i*(dates.length-1)/Math.max(1,tickCount-1)),d=dates[idx],x=xFor(d);
-    svg.appendChild(svgEl("text",{x,y:H-20,"text-anchor":"middle",fill:"#788783","font-size":"12"},d.slice(5).replace("-","/")))
+    svg.appendChild(svgEl("text",{x,y:H-20,"text-anchor":"middle",fill:unit==="kg"?"#40524e":"#788783","font-size":unit==="kg"?"14":"12","font-weight":unit==="kg"?"800":"500"},d.slice(5).replace("-","/")))
   }
   if(dateMarkerKey){
     records.filter(r=>r[dateMarkerKey]===true).forEach(r=>{
@@ -1343,12 +1396,15 @@ function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,date
       if(v===null||v===undefined){prev=null;return}
       const p={x:xFor(r.date),y:yFor(Number(v))};
       if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:p.x,y2:p.y,stroke:s.color,"stroke-width":"3","stroke-linecap":"round","stroke-dasharray":s.dash||""}));
-      const c=svgEl("circle",{cx:p.x,cy:p.y,r:"4.2",fill:s.color});c.appendChild(svgEl("title",{},`${r.date} ${Number(v).toFixed(1)} ${unit}`));svg.appendChild(c);prev=p
+      const c=svgEl("circle",{cx:p.x,cy:p.y,r:unit==="kg"?"5.0":"4.2",fill:s.color,stroke:unit==="kg"?"#fff":"none","stroke-width":unit==="kg"?"1.4":"0"});
+      c.appendChild(svgEl("title",{},`${r.date} ${Number(v).toFixed(1)} ${unit}`));svg.appendChild(c);
+      if(unit==="kg")makeWeightPointInteractive(svg,c,p.x,p.y,Number(v),r.date,s.key==="weightMorning"?"朝":s.key==="weightEvening"?"夜":"体重");
+      prev=p
     })
   });
   if(target!==null&&target>=min&&target<=max){
     const y=yFor(target);svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#765a98","stroke-width":"2","stroke-dasharray":"4 5"}));
-    svg.appendChild(svgEl("text",{x:W-R-4,y:y-5,"text-anchor":"end",fill:"#765a98","font-size":"12"},`目標 ${target.toFixed(1)} ${unit}`))
+    svg.appendChild(svgEl("text",{x:W-R-4,y:y-5,"text-anchor":"end",fill:"#765a98","font-size":unit==="kg"?"13":"12","font-weight":unit==="kg"?"800":"500"},`目標 ${target.toFixed(1)} ${unit}`))
   }
 }
 async function drawHomeChart(){
@@ -1403,28 +1459,25 @@ function drawContinuousHomeChart(svg,records,target=null){
       };
       eventRows.forEach(r=>addHomeEventMarker(svg,xForDate(r.date),215,r.date,r.note));
       const step=Math.max(1,Math.ceil(records.length/6));
-      records.forEach((r,di)=>{if(di%step!==0&&di!==records.length-1)return;svg.appendChild(svgEl("text",{x:xForDate(r.date),y:H-20,"text-anchor":"middle",fill:"#788783","font-size":"12"},r.date.slice(5).replace("-","/")))})
+      records.forEach((r,di)=>{if(di%step!==0&&di!==records.length-1)return;svg.appendChild(svgEl("text",{x:xForDate(r.date),y:H-20,"text-anchor":"middle",fill:"#40524e","font-size":"14","font-weight":"800"},r.date.slice(5).replace("-","/")))})
     }
     return;
   }
 
   const W=720,H=390,L=58,R=18,T=20,B=64;
-  let min=Math.min(...values),max=Math.max(...values);
-  const pad=Math.max(1,(max-min)*.18);
-  min=Math.floor((min-pad)*2)/2;
-  max=Math.ceil((max+pad)*2)/2;
-  if(max-min<2){min-=1;max+=1}
+  const weightAxis=weightAxisBounds(values);
+  let min=weightAxis.min,max=weightAxis.max;
 
   const xFor=i=>points.length===1?(L+W-R)/2:L+i/Math.max(1,points.length-1)*(W-L-R);
   const yFor=v=>T+(max-v)/(max-min)*(H-T-B);
 
-  // 横罫線・縦軸
-  for(let i=0;i<=5;i++){
-    const v=min+(max-min)*i/5,y=yFor(v);
-    svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#dfe7e4","stroke-width":"1"}));
-    svg.appendChild(svgEl("text",{x:L-8,y:y+4,"text-anchor":"end",fill:"#788783","font-size":"12"},v.toFixed(1)));
+  // 横罫線・縦軸：1 kg刻み、整数kg位置に固定
+  for(let v=Math.ceil(min);v<=Math.floor(max);v+=1){
+    const y=yFor(v);
+    svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#d7e1de","stroke-width":"1"}));
+    svg.appendChild(svgEl("text",{x:L-8,y:y+5,"text-anchor":"end",fill:"#40524e","font-size":"14","font-weight":"800"},v.toFixed(1)));
   }
-  svg.appendChild(svgEl("text",{x:18,y:18,fill:"#788783","font-size":"12"},"kg"));
+  svg.appendChild(svgEl("text",{x:18,y:18,fill:"#40524e","font-size":"14","font-weight":"800"},"kg"));
 
   // 日付ラベルは1日1回、朝と夜の中間に表示
   const dayCount=records.length;
@@ -1434,13 +1487,13 @@ function drawContinuousHomeChart(svg,records,target=null){
     if(di%step!==0 && di!==dayCount-1)return;
     const idxMorning=di*2,idxEvening=di*2+1;
     const x=(xFor(idxMorning)+xFor(idxEvening))/2;
-    svg.appendChild(svgEl("text",{x,y:H-20,"text-anchor":"middle",fill:"#788783","font-size":"12"},r.date.slice(5).replace("-","/")));
+    svg.appendChild(svgEl("text",{x,y:H-20,"text-anchor":"middle",fill:"#40524e","font-size":"14","font-weight":"800"},r.date.slice(5).replace("-","/")));
   });
 
   // 朝/夜の小ラベル。14日表示など短期だけ表示する
   if(points.length<=60){
     points.forEach((p,i)=>{
-      svg.appendChild(svgEl("text",{x:xFor(i),y:H-39,"text-anchor":"middle",fill:"#96a39f","font-size":"9"},p.part));
+      svg.appendChild(svgEl("text",{x:xFor(i),y:H-39,"text-anchor":"middle",fill:"#6d7d78","font-size":"10.5","font-weight":"700"},p.part));
     });
   }
 
@@ -1474,16 +1527,17 @@ function drawContinuousHomeChart(svg,records,target=null){
         stroke:"#40524e","stroke-width":"3","stroke-linecap":"round"
       }));
     }
-    const c=svgEl("circle",{cx:x,cy:y,r:"4.5",fill:p.color,stroke:"#ffffff","stroke-width":"1.5"});
+    const c=svgEl("circle",{cx:x,cy:y,r:"5.0",fill:p.color,stroke:"#ffffff","stroke-width":"1.5"});
     c.appendChild(svgEl("title",{},`${p.date} ${p.part} ${Number(p.value).toFixed(1)} kg`));
     svg.appendChild(c);
+    makeWeightPointInteractive(svg,c,x,y,Number(p.value),p.date,p.part);
     prev={x,y};
   });
 
   if(target!==null&&target>=min&&target<=max){
     const y=yFor(target);
     svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#765a98","stroke-width":"2","stroke-dasharray":"4 5"}));
-    svg.appendChild(svgEl("text",{x:W-R-4,y:y-5,"text-anchor":"end",fill:"#765a98","font-size":"12"},`目標 ${target.toFixed(1)} kg`));
+    svg.appendChild(svgEl("text",{x:W-R-4,y:y-5,"text-anchor":"end",fill:"#765a98","font-size":"13","font-weight":"800"},`目標 ${target.toFixed(1)} kg`));
   }
 }
 
@@ -1847,26 +1901,28 @@ function drawVisitCombinedChart(svg,records,targetWeight=null){
   // 同一グラフでも背景色は右軸HbA1cの7%・8%境界に従う
   if(aAxis)drawHbA1cBackgroundBands(svg,yA,aAxis.min,aAxis.max,L,R,W);
 
-  for(let i=0;i<=5;i++){
-    const y=T+(H-T-B)*i/5;
-    svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#dfe7e4","stroke-width":"1"}));
-    if(wAxis){
-      const v=wAxis.max-(wAxis.max-wAxis.min)*i/5;
-      svg.appendChild(svgEl("text",{x:L-9,y:y+4,"text-anchor":"end",fill:"#2f6f65","font-size":"12","font-weight":"700"},v.toFixed(1)))
+  if(wAxis){
+    for(let v=Math.ceil(wAxis.min);v<=Math.floor(wAxis.max);v+=1){
+      const y=yW(v);
+      svg.appendChild(svgEl("line",{x1:L,y1:y,x2:W-R,y2:y,stroke:"#d7e1de","stroke-width":"1"}));
+      svg.appendChild(svgEl("text",{x:L-9,y:y+5,"text-anchor":"end",fill:"#2f6f65","font-size":"14","font-weight":"800"},v.toFixed(1)))
     }
-    if(aAxis){
+  }
+  if(aAxis){
+    for(let i=0;i<=5;i++){
+      const y=T+(H-T-B)*i/5;
       const v=aAxis.max-(aAxis.max-aAxis.min)*i/5;
       svg.appendChild(svgEl("text",{x:W-R+9,y:y+4,"text-anchor":"start",fill:"#765a98","font-size":"12","font-weight":"700"},v.toFixed(1)))
     }
   }
 
-  svg.appendChild(svgEl("text",{x:15,y:18,fill:"#2f6f65","font-size":"12","font-weight":"700"},"体重 kg"));
+  svg.appendChild(svgEl("text",{x:15,y:18,fill:"#2f6f65","font-size":"14","font-weight":"800"},"体重 kg"));
   svg.appendChild(svgEl("text",{x:W-15,y:18,"text-anchor":"end",fill:"#765a98","font-size":"12","font-weight":"700"},"HbA1c %"));
 
   const tickCount=Math.min(6,dates.length);
   for(let i=0;i<tickCount;i++){
     const idx=Math.round(i*(dates.length-1)/Math.max(1,tickCount-1)),d=dates[idx],x=xFor(d);
-    svg.appendChild(svgEl("text",{x,y:H-20,"text-anchor":"middle",fill:"#788783","font-size":"12"},d.slice(5).replace("-","/")))
+    svg.appendChild(svgEl("text",{x,y:H-20,"text-anchor":"middle",fill:"#40524e","font-size":"14","font-weight":"800"},d.slice(5).replace("-","/")))
   }
 
   function drawSeries(key,axis,yFor,color,dash,label,unit){
@@ -1877,9 +1933,11 @@ function drawVisitCombinedChart(svg,records,targetWeight=null){
       if(v===null||v===undefined){prev=null;return}
       const p={x:xFor(r.date),y:yFor(Number(v))};
       if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:p.x,y2:p.y,stroke:color,"stroke-width":"3","stroke-linecap":"round","stroke-dasharray":dash||""}));
-      const c=svgEl("circle",{cx:p.x,cy:p.y,r:"4.3",fill:color,stroke:"#fff","stroke-width":"1.4"});
+      const c=svgEl("circle",{cx:p.x,cy:p.y,r:unit==="kg"?"5.0":"4.3",fill:color,stroke:"#fff","stroke-width":"1.4"});
       c.appendChild(svgEl("title",{},`${r.date} ${label} ${Number(v).toFixed(1)} ${unit}`));
-      svg.appendChild(c);prev=p
+      svg.appendChild(c);
+      if(unit==="kg")makeWeightPointInteractive(svg,c,p.x,p.y,Number(v),r.date,label);
+      prev=p
     })
   }
 
@@ -2260,7 +2318,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:57,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:58,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),

@@ -21,7 +21,7 @@ h1{font-size:18px;margin:0}.subtitle{font-size:12px;color:var(--muted)}
 main{max-width:820px;margin:0 auto;padding:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
 h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:14px 0 8px}
-label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+label{display:block;font-size:14.5px;color:#40524e;font-weight:700;margin-bottom:6px;line-height:1.45}
 input,textarea,select{
   width:100%;border:1px solid #cbd8d4;border-radius:12px;padding:12px;font:inherit;background:#fff;color:var(--ink)
 }
@@ -74,7 +74,7 @@ svg{width:100%;height:auto;display:block}
 .visit-field-hidden{display:none!important}
 .field-picker{margin-top:10px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fbfdfc}
 .field-picker-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px}
-.field-picker-option{display:flex;align-items:flex-start;gap:7px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px}
+.field-picker-option{display:flex;align-items:flex-start;gap:7px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13.5px;font-weight:700;color:#40524e}
 .field-picker-option input{width:auto;margin-top:2px}
 .visit-field-summary{font-size:12px;color:var(--muted);margin-top:8px}
 .visit-field-summary strong{color:var(--accent)}
@@ -714,3 +714,7 @@ body.manual-open{overflow:hidden}
 }
 .encrypted-backup-title{font-weight:900;color:#405d7d;font-size:14px;margin-bottom:5px}
 .encrypted-backup-box input[type="password"]{background:#fff}
+
+/* v58: input-label and weight-chart readability */
+input,textarea,select{font-size:16px}
+.weight-point-value{pointer-events:none}
