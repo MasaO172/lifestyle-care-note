@@ -1250,34 +1250,54 @@ function weightAxisBounds(values){
   if(max-min<2){min-=1;max+=1}
   return {min,max}
 }
-function clearWeightValueTooltip(svg){
-  svg.querySelectorAll(".weight-point-value").forEach(el=>el.remove())
+function clearPointValueTooltip(svg){
+  svg.querySelectorAll(".point-value-tooltip,.weight-point-value").forEach(el=>el.remove())
 }
-function showWeightValueTooltip(svg,x,y,value,date,label="体重"){
-  clearWeightValueTooltip(svg);
-  const W=720,boxW=126,boxH=43;
+function showPointValueTooltip(svg,x,y,valueText,date,label=""){
+  clearPointValueTooltip(svg);
+  const W=720;
+  const main=String(valueText||"");
+  const sub=[String(date||"").slice(5).replace("-","/"),String(label||"")].filter(Boolean).join(" ");
+  const boxW=Math.max(126,Math.min(196,Math.max(main.length*10+30,sub.length*7+28)));
+  const boxH=45;
   let bx=Math.max(4,Math.min(W-boxW-4,x-boxW/2));
-  let by=y-boxH-13;
-  if(by<4)by=y+13;
-  const g=svgEl("g",{class:"weight-point-value","aria-hidden":"true"});
+  let by=y-boxH-14;
+  if(by<4)by=y+14;
+  const g=svgEl("g",{class:"point-value-tooltip","aria-hidden":"true","pointer-events":"none"});
   g.appendChild(svgEl("rect",{x:bx,y:by,width:boxW,height:boxH,rx:"9",fill:"#ffffff",stroke:"#40524e","stroke-width":"1.5"}));
-  g.appendChild(svgEl("text",{x:bx+boxW/2,y:by+20,"text-anchor":"middle",fill:"#263a35","font-size":"16","font-weight":"900"},`${Number(value).toFixed(1)} kg`));
-  g.appendChild(svgEl("text",{x:bx+boxW/2,y:by+35,"text-anchor":"middle",fill:"#667571","font-size":"10.5","font-weight":"700"},`${String(date).slice(5).replace("-","/")} ${label}`));
+  g.appendChild(svgEl("text",{x:bx+boxW/2,y:by+20,"text-anchor":"middle",fill:"#263a35","font-size":"16","font-weight":"900"},main));
+  g.appendChild(svgEl("text",{x:bx+boxW/2,y:by+36,"text-anchor":"middle",fill:"#667571","font-size":"11","font-weight":"700"},sub));
   svg.appendChild(g)
 }
-function makeWeightPointInteractive(svg,c,x,y,value,date,label="体重"){
+function makePointInteractive(svg,c,x,y,valueText,date,label="",ariaText=""){
+  const accessible=ariaText||`${date} ${label} ${valueText}`;
   c.setAttribute("role","button");
   c.setAttribute("tabindex","0");
-  c.setAttribute("aria-label",`${date} ${label} ${Number(value).toFixed(1)} kg`);
+  c.setAttribute("aria-label",accessible);
   c.style.cursor="pointer";
-  // Visible point stays compact; add a generous transparent hit area for touch.
-  const hit=svgEl("circle",{cx:x,cy:y,r:"13",fill:"transparent",role:"button",tabindex:"0","aria-label":`${date} ${label} ${Number(value).toFixed(1)} kg`});
+  // 見える点は小さいまま、タップ判定は広めにする。
+  const hit=svgEl("circle",{cx:x,cy:y,r:"14",fill:"transparent",role:"button",tabindex:"0","aria-label":accessible});
   hit.style.cursor="pointer";
-  const activate=()=>showWeightValueTooltip(svg,x,y,value,date,label);
+  const activate=()=>showPointValueTooltip(svg,x,y,valueText,date,label);
   hit.addEventListener("click",activate);c.addEventListener("click",activate);
   hit.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate()}});
   c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate()}});
   svg.appendChild(hit)
+}
+function makeWeightPointInteractive(svg,c,x,y,value,date,label="体重"){
+  const text=`${Number(value).toFixed(1)} kg`;
+  makePointInteractive(svg,c,x,y,text,date,label,`${date} ${label} ${text}`)
+}
+function graphSeriesLabel(key){
+  const map={
+    hba1c:"HbA1c",
+    ga:"GA",
+    estimatedHbA1c:"推定HbA1c",
+    weight:"体重",
+    weightMorning:"朝体重",
+    weightEvening:"夜体重"
+  };
+  return map[key]||key
 }
 
 function drawHbA1cBackgroundBands(svg,yFor,yMin,yMax,L,R,W){
@@ -1329,7 +1349,7 @@ function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,date
   records.forEach(r=>series.forEach(s=>{const v=r[s.key];if(v!==null&&v!==undefined)values.push(Number(v))}));
   const eventRows=eventKey?records.filter(r=>String(r[eventKey]||"").trim()!==""):[];
   if(!values.length){
-    svg.appendChild(svgEl("text",{x:360,y:height/2-18,"text-anchor":"middle",fill:"#788783","font-size":"20"},"この期間に体重記録がありません"));
+    svg.appendChild(svgEl("text",{x:360,y:height/2-18,"text-anchor":"middle",fill:"#788783","font-size":"20"},unit==="kg"?"この期間に体重記録がありません":"この期間に記録がありません"));
     if(eventRows.length){
       const W=720,H=height,L=58,R=18,B=48,dates=[...new Set(records.map(r=>r.date))];
       const xFor=date=>dates.length===1?(L+W-R)/2:L+dates.indexOf(date)/Math.max(1,dates.length-1)*(W-L-R);
@@ -1397,8 +1417,15 @@ function drawSimpleLineChart(svg,records,series,unit,height=330,target=null,date
       const p={x:xFor(r.date),y:yFor(Number(v))};
       if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:p.x,y2:p.y,stroke:s.color,"stroke-width":"3","stroke-linecap":"round","stroke-dasharray":s.dash||""}));
       const c=svgEl("circle",{cx:p.x,cy:p.y,r:unit==="kg"?"5.0":"4.2",fill:s.color,stroke:unit==="kg"?"#fff":"none","stroke-width":unit==="kg"?"1.4":"0"});
-      c.appendChild(svgEl("title",{},`${r.date} ${Number(v).toFixed(1)} ${unit}`));svg.appendChild(c);
-      if(unit==="kg")makeWeightPointInteractive(svg,c,p.x,p.y,Number(v),r.date,s.key==="weightMorning"?"朝":s.key==="weightEvening"?"夜":"体重");
+      const pointLabel=graphSeriesLabel(s.key);
+      const decimals=unit==="kg"||unit==="%"?1:0;
+      const valueText=`${Number(v).toFixed(decimals)}${unit?` ${unit}`:""}`;
+      c.appendChild(svgEl("title",{},`${r.date} ${pointLabel} ${valueText}`));svg.appendChild(c);
+      if(unit==="kg"){
+        makeWeightPointInteractive(svg,c,p.x,p.y,Number(v),r.date,s.key==="weightMorning"?"朝":s.key==="weightEvening"?"夜":"体重")
+      }else{
+        makePointInteractive(svg,c,p.x,p.y,valueText,r.date,pointLabel,`${r.date} ${pointLabel} ${valueText}`)
+      }
       prev=p
     })
   });
@@ -1695,8 +1722,11 @@ async function drawSmbgChart(){
         const p={x:xFor(r.date),y:yFor(Number(v))};
         if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:p.x,y2:p.y,stroke:SMBG_COLORS[k],"stroke-width":"2.4","stroke-linecap":"round"}));
         const c=svgEl("circle",{cx:p.x,cy:p.y,r:"4",fill:SMBG_COLORS[k],stroke:"#fff","stroke-width":"1.3"});
-        c.appendChild(svgEl("title",{},`${r.date} ${SMBG_LABELS[k]} ${Number(v).toFixed(0)} mg/dL`));
-        svg.appendChild(c);prev=p
+        const valueText=`${Number(v).toFixed(0)} mg/dL`;
+        c.appendChild(svgEl("title",{},`${r.date} ${SMBG_LABELS[k]} ${valueText}`));
+        svg.appendChild(c);
+        makePointInteractive(svg,c,p.x,p.y,valueText,r.date,SMBG_LABELS[k],`${r.date} ${SMBG_LABELS[k]} ${valueText}`);
+        prev=p
       })
     })
   }else{
@@ -1722,8 +1752,11 @@ async function drawSmbgChart(){
       const x=xFor(i),y=yFor(Number(p.value));
       if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:x,y2:y,stroke:"#40524e","stroke-width":"2.4","stroke-linecap":"round"}));
       const c=svgEl("circle",{cx:x,cy:y,r:"4",fill:SMBG_COLORS[p.key],stroke:"#fff","stroke-width":"1.3"});
-      c.appendChild(svgEl("title",{},`${p.date} ${SMBG_LABELS[p.key]} ${Number(p.value).toFixed(0)} mg/dL`));
-      svg.appendChild(c);prev={x,y}
+      const valueText=`${Number(p.value).toFixed(0)} mg/dL`;
+      c.appendChild(svgEl("title",{},`${p.date} ${SMBG_LABELS[p.key]} ${valueText}`));
+      svg.appendChild(c);
+      makePointInteractive(svg,c,x,y,valueText,p.date,SMBG_LABELS[p.key],`${p.date} ${SMBG_LABELS[p.key]} ${valueText}`);
+      prev={x,y}
     })
   }
 }
@@ -1802,7 +1835,7 @@ async function drawBpChart(){
     svg.appendChild(svgEl("text",{x:W-R-5,y:y-6,"text-anchor":"end",fill:"#263a35","font-size":"13","font-weight":"900"},t.label))
   });
 
-  const drawLine=(points,color,label,dash="")=>{let prev=null;points.forEach(p=>{if(p.value===null||p.value===undefined){prev=null;return}const x=p.x,y=yFor(Number(p.value));if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:x,y2:y,stroke:color,"stroke-width":"2.8","stroke-linecap":"round","stroke-dasharray":dash}));const c=svgEl("circle",{cx:x,cy:y,r:"4.2",fill:color,stroke:"#fff","stroke-width":"1.3"});c.appendChild(svgEl("title",{},`${p.date} ${p.part||""} ${label} ${Number(p.value).toFixed(0)} mmHg`));svg.appendChild(c);prev={x,y}})};
+  const drawLine=(points,color,label,dash="")=>{let prev=null;points.forEach(p=>{if(p.value===null||p.value===undefined){prev=null;return}const x=p.x,y=yFor(Number(p.value));if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:x,y2:y,stroke:color,"stroke-width":"2.8","stroke-linecap":"round","stroke-dasharray":dash}));const c=svgEl("circle",{cx:x,cy:y,r:"4.2",fill:color,stroke:"#fff","stroke-width":"1.3"});const valueText=`${Number(p.value).toFixed(0)} mmHg`;const pointLabel=[p.part||"",label].filter(Boolean).join(" ");c.appendChild(svgEl("title",{},`${p.date} ${pointLabel} ${valueText}`));svg.appendChild(c);makePointInteractive(svg,c,x,y,valueText,p.date,pointLabel,`${p.date} ${pointLabel} ${valueText}`);prev={x,y}})};
   if(selectedBpChartMode==="continuous"){
     const slots=[];records.forEach(r=>{slots.push({date:r.date,part:"朝",sbp:r.bpMorningSbp,dbp:r.bpMorningDbp});slots.push({date:r.date,part:"夜",sbp:r.bpEveningSbp,dbp:r.bpEveningDbp})});
     const xFor=i=>slots.length<=1?(L+W-R)/2:L+i/Math.max(1,slots.length-1)*(W-L-R);
@@ -1934,9 +1967,14 @@ function drawVisitCombinedChart(svg,records,targetWeight=null){
       const p={x:xFor(r.date),y:yFor(Number(v))};
       if(prev)svg.appendChild(svgEl("line",{x1:prev.x,y1:prev.y,x2:p.x,y2:p.y,stroke:color,"stroke-width":"3","stroke-linecap":"round","stroke-dasharray":dash||""}));
       const c=svgEl("circle",{cx:p.x,cy:p.y,r:unit==="kg"?"5.0":"4.3",fill:color,stroke:"#fff","stroke-width":"1.4"});
-      c.appendChild(svgEl("title",{},`${r.date} ${label} ${Number(v).toFixed(1)} ${unit}`));
+      const valueText=`${Number(v).toFixed(1)} ${unit}`;
+      c.appendChild(svgEl("title",{},`${r.date} ${label} ${valueText}`));
       svg.appendChild(c);
-      if(unit==="kg")makeWeightPointInteractive(svg,c,p.x,p.y,Number(v),r.date,label);
+      if(unit==="kg"){
+        makeWeightPointInteractive(svg,c,p.x,p.y,Number(v),r.date,label)
+      }else{
+        makePointInteractive(svg,c,p.x,p.y,valueText,r.date,label,`${r.date} ${label} ${valueText}`)
+      }
       prev=p
     })
   }
@@ -2037,8 +2075,10 @@ function drawEgfrSlopeSvg(svg,valid,reg){
   valid.forEach(r=>{
     const x=xForMs(parseLocalDate(r.date).getTime()),y=yFor(r.egfr);
     const c=svgEl("circle",{cx:x,cy:y,r:"5",fill:"#2f6f65",stroke:"#fff","stroke-width":"1.5"});
-    c.appendChild(svgEl("title",{},`${r.date} eGFR ${r.egfr.toFixed(1)}`));
-    svg.appendChild(c)
+    const valueText=r.egfr.toFixed(1);
+    c.appendChild(svgEl("title",{},`${r.date} eGFR ${valueText}`));
+    svg.appendChild(c);
+    makePointInteractive(svg,c,x,y,valueText,r.date,"eGFR",`${r.date} eGFR ${valueText}`)
   })
 }
 async function drawEgfrSlope(){
@@ -2318,7 +2358,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:59,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:60,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
