@@ -718,3 +718,45 @@ body.manual-open{overflow:hidden}
 /* v58: input-label and weight-chart readability */
 input,textarea,select{font-size:16px}
 .weight-point-value{pointer-events:none}
+
+
+/* v61: 食事写真の回転・トリミング編集 */
+.meal-photo-card-actions{display:grid;grid-template-columns:1fr;gap:5px;margin-top:5px}
+.meal-photo-card .photo-edit-one,
+.meal-photo-card .photo-delete-one{width:100%;margin:0;padding:6px 7px;font-size:10.5px}
+
+.photo-editor{
+  position:fixed;inset:0;z-index:2600;background:rgba(18,25,23,.78);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));
+  overflow:auto
+}
+.photo-editor.open{display:flex}
+.photo-editor-shell{
+  width:min(760px,100%);background:#fff;border-radius:18px;padding:12px;
+  box-shadow:0 18px 55px rgba(0,0,0,.32)
+}
+.photo-editor-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.photo-editor-title{font-size:18px;font-weight:900;color:var(--accent)}
+.photo-editor-caption{font-size:11px;color:var(--muted);margin-top:2px}
+.photo-editor-help{font-size:11.5px;color:#53635f;line-height:1.55;margin:8px 0}
+.photo-editor-stage{background:#111;border-radius:12px;overflow:hidden;touch-action:none;user-select:none}
+#photoEditorCanvas{
+  display:block;width:100%;height:auto;max-height:58vh;background:#111;
+  touch-action:none;user-select:none;-webkit-user-select:none
+}
+.photo-editor-controls{display:grid;gap:10px;margin-top:10px}
+.photo-editor-row{display:flex;gap:7px;flex-wrap:wrap}
+.photo-editor-zoom label,
+.photo-editor-control-label{font-size:12px;font-weight:800;color:#40524e;margin-bottom:5px}
+.photo-editor-zoom input{padding:0;border:0}
+.photo-editor-aspects{display:flex;gap:6px;flex-wrap:wrap}
+.photo-editor-aspects button.active{background:var(--accent);color:#fff}
+.photo-editor-footer{margin-top:11px;border-top:1px solid var(--line);padding-top:9px}
+.photo-editor-footer .row{margin-top:8px}
+body.photo-editor-open{overflow:hidden}
+@media(max-width:620px){
+  .photo-editor{padding-left:6px;padding-right:6px}
+  .photo-editor-shell{border-radius:14px;padding:10px}
+  .photo-editor-help{font-size:11px}
+}

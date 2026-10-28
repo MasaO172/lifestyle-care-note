@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="生活習慣ケアノート">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>生活習慣ケアノート v60</title>
+<title>生活習慣ケアノート v61</title>
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
   <div class="brand">
     <div class="logo"><img src="./icon-192.png" alt="生活習慣ケアノート アイコン"></div>
     <div>
-      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v60</span></h1>
+      <h1>生活習慣ケアノート <span style="font-size:12px;font-weight:600;color:#7b8985">v61</span></h1>
       <div class="subtitle">体重・血糖・血圧・食事・外来経過をひとつに</div>
     </div>
   </div>
@@ -131,7 +131,7 @@
     </div>
     <div id="legacyBodyMeasureNote" class="note" style="display:none;margin-top:8px"></div>
     <h3>食事</h3>
-    <div class="note" style="margin-bottom:8px">文字入力は任意です。各食事につき最大6枚まで写真を保存できます。外食などで料理が順番に出る場合は、その都度「＋ もう1枚追加」から追加できます。写真は端末内で自動的に縮小・圧縮して保存します。</div>
+    <div class="note" style="margin-bottom:8px">文字入力は任意です。各食事につき最大6枚まで写真を保存できます。外食などで料理が順番に出る場合は、その都度「＋ もう1枚追加」から追加できます。写真は端末内で自動的に縮小・圧縮して保存します。保存後の写真は<strong>「写真を編集」から90°回転・拡大縮小・位置調整・トリミング</strong>できます。編集を保存すると編集後画像で上書きし、元画像は残しません。</div>
 
     <div class="meal-photo-block">
       <label for="breakfast">朝食</label><textarea id="breakfast" placeholder="例：トースト1枚、目玉焼き、牛乳（文字は任意）"></textarea>
@@ -1177,7 +1177,7 @@
     <div class="privacy">
       <strong>このアプリの記録は端末内に保存されます。</strong><br>
       患者さんの記録を病院・GitHub・外部解析サービスへ自動送信する機能はありません。
-      v60では、外部スクリプトを読み込まず、Content Security Policy（CSP）で
+      v61では、外部スクリプトを読み込まず、Content Security Policy（CSP）で
       外部へのJavaScript通信・外部スクリプト実行を制限しています。
     </div>
     <div class="note" style="margin-top:8px">
@@ -1323,6 +1323,56 @@
 
 
 </main>
+
+<div id="photoEditor" class="photo-editor" role="dialog" aria-modal="true" aria-label="食事写真の編集" aria-hidden="true">
+  <div class="photo-editor-shell">
+    <div class="photo-editor-head">
+      <div>
+        <div class="photo-editor-title">写真を編集</div>
+        <div id="photoEditorCaption" class="photo-editor-caption"></div>
+      </div>
+      <button id="photoEditorClose" type="button" class="secondary small">キャンセル</button>
+    </div>
+
+    <div class="photo-editor-help">写真をドラッグして位置を調整し、2本指のピンチまたは下のスライダーで拡大・縮小します。白枠の内側が保存されます。</div>
+
+    <div class="photo-editor-stage">
+      <canvas id="photoEditorCanvas" width="720" height="540" aria-label="写真トリミング編集"></canvas>
+    </div>
+
+    <div class="photo-editor-controls">
+      <div class="photo-editor-row">
+        <button id="photoRotateLeft" type="button" class="secondary small">↶ 左90°</button>
+        <button id="photoRotateRight" type="button" class="secondary small">↷ 右90°</button>
+        <button id="photoEditorReset" type="button" class="ghost small">位置をリセット</button>
+      </div>
+
+      <div class="photo-editor-zoom">
+        <label for="photoEditorZoom">拡大・縮小</label>
+        <input id="photoEditorZoom" type="range" min="1" max="4" step="0.05" value="1">
+      </div>
+
+      <div>
+        <div class="photo-editor-control-label">トリミング比率</div>
+        <div id="photoEditorAspectButtons" class="photo-editor-aspects">
+          <button type="button" class="secondary small active" data-aspect="original">元の比率</button>
+          <button type="button" class="secondary small" data-aspect="1:1">1:1</button>
+          <button type="button" class="secondary small" data-aspect="4:3">4:3</button>
+          <button type="button" class="secondary small" data-aspect="3:4">3:4</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-editor-footer">
+      <div class="note">保存すると編集後画像で同じ写真を上書きします。編集前の画像は残しません。</div>
+      <div class="row">
+        <button id="photoEditorSave" type="button">編集を保存</button>
+        <button id="photoEditorCancelBottom" type="button" class="secondary">キャンセル</button>
+      </div>
+      <div id="photoEditorStatus" class="status"></div>
+    </div>
+  </div>
+</div>
 
 <div id="photoModal" class="photo-modal" role="dialog" aria-modal="true" aria-label="食事写真">
   <button id="photoModalClose" class="photo-modal-close" type="button">閉じる</button>

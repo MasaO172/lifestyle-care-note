@@ -18,6 +18,10 @@ const MAX_PHOTOS_PER_MEAL=6;
 const MEAL_REVIEW_SELECTION_KEY="weightControlMealReviewSelectionsV14";
 const MEAL_REVIEW_DAYS=30;
 const photoObjectUrls=new Map();
+const photoEditorState={
+  rec:null,img:null,rotation:0,zoom:1,offsetX:0,offsetY:0,aspect:"original",
+  pointers:new Map(),lastSingle:null,lastPinch:null
+};
 const VISIT_FIELD_SETTINGS_KEY="weightControlVisitFieldSettingsV10";
 const DEFAULT_VISIT_FIELDS=["weight","bp","hba1c"];
 const VISIT_FIELD_LABELS={
@@ -180,6 +184,14 @@ async function getMealPhotos(date,meal){
     return ta.localeCompare(tb)||String(a.id).localeCompare(String(b.id))
   })
 }
+async function getMealPhotoById(id){
+  if(!photoStorageAvailable())return null;
+  return await new Promise((resolve,reject)=>{
+    const req=db.transaction(PHOTO_STORE).objectStore(PHOTO_STORE).get(id);
+    req.onsuccess=()=>resolve(req.result||null);
+    req.onerror=()=>reject(req.error)
+  })
+}
 async function deleteMealPhotoById(id){
   if(!photoStorageAvailable())return;
   await new Promise((resolve,reject)=>{
@@ -243,7 +255,223 @@ async function compressMealPhoto(file){
     if(blob.size<=350*1024)return {blob,width:w,height:h};
     if(quality>.54)quality-=.08; else maxSide=Math.round(maxSide*.82)
   }
+
   return {blob,width:lastW,height:lastH}
+}
+
+/* 食事写真編集：保存済みBlobをCanvas上で回転・移動・拡大し、白枠内だけをJPEGとして上書きする */
+function photoEditorRotatedSize(){
+  const img=photoEditorState.img;if(!img)return {w:1,h:1};
+  const w=img.naturalWidth||img.width||1,h=img.naturalHeight||img.height||1;
+  return Math.abs(photoEditorState.rotation)%180===90?{w:h,h:w}:{w,h}
+}
+function photoEditorAspectRatio(){
+  if(photoEditorState.aspect==="1:1")return 1;
+  if(photoEditorState.aspect==="4:3")return 4/3;
+  if(photoEditorState.aspect==="3:4")return 3/4;
+  const s=photoEditorRotatedSize();
+  return s.w/Math.max(1,s.h)
+}
+function photoEditorCropRect(){
+  const canvas=$("photoEditorCanvas"),margin=34;
+  const maxW=canvas.width-margin*2,maxH=canvas.height-margin*2;
+  const ratio=photoEditorAspectRatio();
+  let w=maxW,h=w/ratio;
+  if(h>maxH){h=maxH;w=h*ratio}
+  return {x:(canvas.width-w)/2,y:(canvas.height-h)/2,w,h,cx:canvas.width/2,cy:canvas.height/2}
+}
+function photoEditorBaseScale(){
+  const crop=photoEditorCropRect(),s=photoEditorRotatedSize();
+  return Math.max(crop.w/s.w,crop.h/s.h)
+}
+function clampPhotoEditorView(){
+  if(!photoEditorState.img)return;
+  photoEditorState.zoom=Math.max(1,Math.min(4,Number(photoEditorState.zoom)||1));
+  const crop=photoEditorCropRect(),s=photoEditorRotatedSize();
+  const scale=photoEditorBaseScale()*photoEditorState.zoom;
+  const maxX=Math.max(0,(s.w*scale-crop.w)/2);
+  const maxY=Math.max(0,(s.h*scale-crop.h)/2);
+  photoEditorState.offsetX=Math.max(-maxX,Math.min(maxX,photoEditorState.offsetX));
+  photoEditorState.offsetY=Math.max(-maxY,Math.min(maxY,photoEditorState.offsetY));
+}
+function renderPhotoEditor(){
+  const canvas=$("photoEditorCanvas"),img=photoEditorState.img;if(!canvas||!img)return;
+  clampPhotoEditorView();
+  const ctx=canvas.getContext("2d",{alpha:false}),crop=photoEditorCropRect();
+  const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+  const scale=photoEditorBaseScale()*photoEditorState.zoom;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#111";ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.save();
+  ctx.translate(crop.cx+photoEditorState.offsetX,crop.cy+photoEditorState.offsetY);
+  ctx.rotate(photoEditorState.rotation*Math.PI/180);
+  ctx.scale(scale,scale);
+  ctx.drawImage(img,-w/2,-h/2,w,h);
+  ctx.restore();
+
+  // Crop outside darkening
+  ctx.fillStyle="rgba(0,0,0,.58)";
+  ctx.fillRect(0,0,canvas.width,crop.y);
+  ctx.fillRect(0,crop.y+crop.h,canvas.width,canvas.height-(crop.y+crop.h));
+  ctx.fillRect(0,crop.y,crop.x,crop.h);
+  ctx.fillRect(crop.x+crop.w,crop.y,canvas.width-(crop.x+crop.w),crop.h);
+
+  // Crop frame + thirds grid
+  ctx.strokeStyle="rgba(255,255,255,.97)";ctx.lineWidth=3;
+  ctx.strokeRect(crop.x,crop.y,crop.w,crop.h);
+  ctx.strokeStyle="rgba(255,255,255,.45)";ctx.lineWidth=1;
+  for(const p of [1/3,2/3]){
+    ctx.beginPath();ctx.moveTo(crop.x+crop.w*p,crop.y);ctx.lineTo(crop.x+crop.w*p,crop.y+crop.h);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(crop.x,crop.y+crop.h*p);ctx.lineTo(crop.x+crop.w,crop.y+crop.h*p);ctx.stroke()
+  }
+  if($("photoEditorZoom"))$("photoEditorZoom").value=String(photoEditorState.zoom);
+}
+function resetPhotoEditorView(resetAspect=false){
+  photoEditorState.rotation=0;
+  photoEditorState.zoom=1;
+  photoEditorState.offsetX=0;
+  photoEditorState.offsetY=0;
+  if(resetAspect)photoEditorState.aspect="original";
+  photoEditorState.pointers.clear();photoEditorState.lastSingle=null;photoEditorState.lastPinch=null;
+  document.querySelectorAll("#photoEditorAspectButtons button").forEach(b=>b.classList.toggle("active",b.dataset.aspect===photoEditorState.aspect));
+  renderPhotoEditor()
+}
+async function openPhotoEditor(rec,caption=""){
+  if(!rec?.blob)return;
+  closePhotoModal();
+  photoEditorState.rec=rec;
+  photoEditorState.img=null;
+  photoEditorState.rotation=0;photoEditorState.zoom=1;photoEditorState.offsetX=0;photoEditorState.offsetY=0;photoEditorState.aspect="original";
+  photoEditorState.pointers.clear();photoEditorState.lastSingle=null;photoEditorState.lastPinch=null;
+  $("photoEditorCaption").textContent=caption||`${rec.date||""} ${MEAL_LABELS[rec.meal]||""}`;
+  $("photoEditorStatus").textContent="画像を読み込んでいます…";
+  $("photoEditor").classList.add("open");$("photoEditor").setAttribute("aria-hidden","false");document.body.classList.add("photo-editor-open");
+  document.querySelectorAll("#photoEditorAspectButtons button").forEach(b=>b.classList.toggle("active",b.dataset.aspect==="original"));
+  try{
+    photoEditorState.img=await loadImageFromFile(rec.blob);
+    $("photoEditorStatus").textContent="";
+    renderPhotoEditor()
+  }catch(e){
+    $("photoEditorStatus").textContent="画像を編集画面に読み込めませんでした："+e.message
+  }
+}
+function closePhotoEditor(){
+  $("photoEditor").classList.remove("open");$("photoEditor").setAttribute("aria-hidden","true");document.body.classList.remove("photo-editor-open");
+  photoEditorState.rec=null;photoEditorState.img=null;photoEditorState.pointers.clear();photoEditorState.lastSingle=null;photoEditorState.lastPinch=null;
+  $("photoEditorStatus").textContent=""
+}
+function rotatePhotoEditor(delta){
+  if(!photoEditorState.img)return;
+  photoEditorState.rotation=(photoEditorState.rotation+delta+360)%360;
+  photoEditorState.zoom=1;photoEditorState.offsetX=0;photoEditorState.offsetY=0;
+  renderPhotoEditor()
+}
+function photoEditorCanvasPoint(e){
+  const canvas=$("photoEditorCanvas"),r=canvas.getBoundingClientRect();
+  return {x:(e.clientX-r.left)*canvas.width/Math.max(1,r.width),y:(e.clientY-r.top)*canvas.height/Math.max(1,r.height)}
+}
+function photoEditorPinchInfo(){
+  const pts=[...photoEditorState.pointers.values()];
+  if(pts.length<2)return null;
+  const a=pts[0],b=pts[1],dx=b.x-a.x,dy=b.y-a.y;
+  return {dist:Math.max(1,Math.hypot(dx,dy)),mid:{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}
+}
+function setupPhotoEditorGestures(){
+  const canvas=$("photoEditorCanvas");if(!canvas)return;
+  canvas.addEventListener("pointerdown",e=>{
+    if(!photoEditorState.img)return;
+    e.preventDefault();
+    try{canvas.setPointerCapture(e.pointerId)}catch(_){}
+    const p=photoEditorCanvasPoint(e);photoEditorState.pointers.set(e.pointerId,p);
+    if(photoEditorState.pointers.size===1){photoEditorState.lastSingle=p;photoEditorState.lastPinch=null}
+    else if(photoEditorState.pointers.size>=2){photoEditorState.lastPinch=photoEditorPinchInfo();photoEditorState.lastSingle=null}
+  });
+  canvas.addEventListener("pointermove",e=>{
+    if(!photoEditorState.img||!photoEditorState.pointers.has(e.pointerId))return;
+    e.preventDefault();
+    const p=photoEditorCanvasPoint(e);photoEditorState.pointers.set(e.pointerId,p);
+    if(photoEditorState.pointers.size===1){
+      const last=photoEditorState.lastSingle;
+      if(last){photoEditorState.offsetX+=p.x-last.x;photoEditorState.offsetY+=p.y-last.y}
+      photoEditorState.lastSingle=p
+    }else{
+      const now=photoEditorPinchInfo(),last=photoEditorState.lastPinch;
+      if(now&&last){
+        photoEditorState.zoom=Math.max(1,Math.min(4,photoEditorState.zoom*(now.dist/Math.max(1,last.dist))));
+        photoEditorState.offsetX+=now.mid.x-last.mid.x;
+        photoEditorState.offsetY+=now.mid.y-last.mid.y
+      }
+      photoEditorState.lastPinch=now;photoEditorState.lastSingle=null
+    }
+    renderPhotoEditor()
+  });
+  const end=e=>{
+    photoEditorState.pointers.delete(e.pointerId);
+    if(photoEditorState.pointers.size===1){
+      photoEditorState.lastSingle=[...photoEditorState.pointers.values()][0];photoEditorState.lastPinch=null
+    }else if(photoEditorState.pointers.size>=2){
+      photoEditorState.lastPinch=photoEditorPinchInfo();photoEditorState.lastSingle=null
+    }else{
+      photoEditorState.lastSingle=null;photoEditorState.lastPinch=null
+    }
+  };
+  canvas.addEventListener("pointerup",end);
+  canvas.addEventListener("pointercancel",end)
+}
+async function encodeEditedMealCanvas(canvas){
+  let working=canvas,quality=.84,blob=null;
+  for(let i=0;i<7;i++){
+    blob=await canvasBlob(working,quality);
+    if(blob.size<=350*1024)return {blob,width:working.width,height:working.height};
+    if(quality>.58){quality-=.07;continue}
+    const nw=Math.max(320,Math.round(working.width*.84)),nh=Math.max(240,Math.round(working.height*.84));
+    if(nw===working.width&&nh===working.height)break;
+    const smaller=document.createElement("canvas");smaller.width=nw;smaller.height=nh;
+    smaller.getContext("2d",{alpha:false}).drawImage(working,0,0,nw,nh);
+    working=smaller;quality=.72
+  }
+  return {blob,width:working.width,height:working.height}
+}
+async function buildEditedMealPhoto(){
+  const img=photoEditorState.img;if(!img)throw new Error("編集画像がありません");
+  clampPhotoEditorView();
+  const crop=photoEditorCropRect(),ratio=crop.w/crop.h;
+  const displayScale=photoEditorBaseScale()*photoEditorState.zoom;
+  const sourceLong=Math.max(crop.w/displayScale,crop.h/displayScale);
+  const longSide=Math.max(320,Math.min(1280,Math.round(sourceLong)));
+  let outW,outH;
+  if(ratio>=1){outW=longSide;outH=Math.max(1,Math.round(outW/ratio))}
+  else{outH=longSide;outW=Math.max(1,Math.round(outH*ratio))}
+  const canvas=document.createElement("canvas");canvas.width=outW;canvas.height=outH;
+  const ctx=canvas.getContext("2d",{alpha:false});
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,outW,outH);
+  const fx=outW/crop.w,fy=outH/crop.h;
+  const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+  ctx.save();
+  ctx.translate((crop.cx+photoEditorState.offsetX-crop.x)*fx,(crop.cy+photoEditorState.offsetY-crop.y)*fy);
+  ctx.rotate(photoEditorState.rotation*Math.PI/180);
+  ctx.scale(displayScale*fx,displayScale*fy);
+  ctx.drawImage(img,-w/2,-h/2,w,h);
+  ctx.restore();
+  return encodeEditedMealCanvas(canvas)
+}
+async function savePhotoEditor(){
+  const rec=photoEditorState.rec;if(!rec||!photoEditorState.img)return;
+  try{
+    setSaveStatus("photoEditorStatus","編集した写真を保存しています…","");
+    const {blob,width,height}=await buildEditedMealPhoto();
+    const updated={...rec,blob,mime:"image/jpeg",size:blob.size,width,height,updatedAt:new Date().toISOString()};
+    await putMealPhoto(updated); // 同じidへputするため、旧Blobは置き換わり元画像は残らない
+    const date=updated.date,meal=updated.meal;
+    closePhotoEditor();
+    revokePhotoUrlsPrefix(`current:${meal}:`);
+    await renderMealPhotoPreview(date,meal);
+    await refreshStorageUsage();
+    setSaveStatus("saveStatus",`${MEAL_LABELS[meal]}の写真を編集して上書き保存しました ✓（${width}×${height}px・${formatBytes(blob.size)}）`,"ok")
+  }catch(e){
+    setSaveStatus("photoEditorStatus","編集した写真を保存できませんでした："+e.message,"warn")
+  }
 }
 function updateMealPhotoAddUI(meal,count){
   const label=document.querySelector(`.photo-add-label[data-meal="${meal}"]`);
@@ -266,6 +494,9 @@ async function renderMealPhotoPreview(date,meal){
     img.onclick=()=>openPhotoModal(rec.blob,`${date} ${MEAL_LABELS[meal]} 写真${i+1}/${photos.length}`);
     const meta=document.createElement("div");meta.className="meal-photo-card-meta";
     meta.innerHTML=`<strong>写真 ${i+1}</strong><br>${formatBytes(rec.size||rec.blob.size)}・${rec.width||"?"}×${rec.height||"?"} px`;
+    const actions=document.createElement("div");actions.className="meal-photo-card-actions";
+    const edit=document.createElement("button");edit.type="button";edit.className="small secondary photo-edit-one";edit.textContent="✂️ 写真を編集";
+    edit.onclick=()=>openPhotoEditor(rec,`${date} ${MEAL_LABELS[meal]} 写真${i+1}/${photos.length}`);
     const del=document.createElement("button");del.type="button";del.className="small danger photo-delete-one";del.textContent="この写真を削除";
     del.onclick=async()=>{
       if(!confirm(`${MEAL_LABELS[meal]}の写真${i+1}を削除しますか？`))return;
@@ -275,7 +506,8 @@ async function renderMealPhotoPreview(date,meal){
       await refreshStorageUsage();
       setSaveStatus("saveStatus",`${MEAL_LABELS[meal]}の写真を1枚削除しました。`,"ok")
     };
-    card.append(img,meta,del);box.appendChild(card)
+    actions.append(edit,del);
+    card.append(img,meta,actions);box.appendChild(card)
   });
   updateMealPhotoAddUI(meal,photos.length)
 }
@@ -2358,7 +2590,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:60,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:61,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
@@ -2902,6 +3134,22 @@ $("visitNormalViewBtn").onclick=()=>{
 // 写真拡大表示
 $("photoModalClose").onclick=closePhotoModal;
 $("photoModal").addEventListener("click",e=>{if(e.target===$("photoModal"))closePhotoModal()});
+
+// 写真編集
+$("photoEditorClose").onclick=closePhotoEditor;
+$("photoEditorCancelBottom").onclick=closePhotoEditor;
+$("photoRotateLeft").onclick=()=>rotatePhotoEditor(-90);
+$("photoRotateRight").onclick=()=>rotatePhotoEditor(90);
+$("photoEditorReset").onclick=()=>resetPhotoEditorView(false);
+$("photoEditorSave").onclick=savePhotoEditor;
+$("photoEditorZoom").addEventListener("input",e=>{photoEditorState.zoom=Number(e.target.value)||1;renderPhotoEditor()});
+document.querySelectorAll("#photoEditorAspectButtons button").forEach(b=>b.onclick=()=>{
+  photoEditorState.aspect=b.dataset.aspect||"original";
+  photoEditorState.zoom=1;photoEditorState.offsetX=0;photoEditorState.offsetY=0;
+  document.querySelectorAll("#photoEditorAspectButtons button").forEach(x=>x.classList.toggle("active",x===b));
+  renderPhotoEditor()
+});
+setupPhotoEditorGestures();
 
 // 食事写真（1食最大6枚）
 MEALS.forEach(meal=>{

@@ -1,5 +1,5 @@
 const CACHE_PREFIX="lifestyle-care-note-";
-const CACHE=CACHE_PREFIX+"v60";
+const CACHE=CACHE_PREFIX+"v61";
 
 /*
   起動に必須の3ファイルはインストール時に必ずキャッシュする。
