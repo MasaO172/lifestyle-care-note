@@ -760,3 +760,10 @@ body.photo-editor-open{overflow:hidden}
   .photo-editor-shell{border-radius:14px;padding:10px}
   .photo-editor-help{font-size:11px}
 }
+
+
+/* v62: PowerPoint風の自由トリミング */
+.photo-editor-stage{position:relative}
+#photoEditorCanvas{cursor:move}
+.photo-editor-help strong{color:#263a35}
+.photo-editor-aspects button{min-width:62px}

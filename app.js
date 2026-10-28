@@ -19,8 +19,9 @@ const MEAL_REVIEW_SELECTION_KEY="weightControlMealReviewSelectionsV14";
 const MEAL_REVIEW_DAYS=30;
 const photoObjectUrls=new Map();
 const photoEditorState={
-  rec:null,img:null,rotation:0,zoom:1,offsetX:0,offsetY:0,aspect:"original",
-  pointers:new Map(),lastSingle:null,lastPinch:null
+  rec:null,img:null,rotation:0,zoom:1,offsetX:0,offsetY:0,crop:null,
+  pointers:new Map(),lastSingle:null,lastPinch:null,
+  interaction:null,activeHandle:null,startPoint:null,startCrop:null
 };
 const VISIT_FIELD_SETTINGS_KEY="weightControlVisitFieldSettingsV10";
 const DEFAULT_VISIT_FIELDS=["weight","bp","hba1c"];
@@ -265,76 +266,127 @@ function photoEditorRotatedSize(){
   const w=img.naturalWidth||img.width||1,h=img.naturalHeight||img.height||1;
   return Math.abs(photoEditorState.rotation)%180===90?{w:h,h:w}:{w,h}
 }
-function photoEditorAspectRatio(){
-  if(photoEditorState.aspect==="1:1")return 1;
-  if(photoEditorState.aspect==="4:3")return 4/3;
-  if(photoEditorState.aspect==="3:4")return 3/4;
+function photoEditorStageRect(){
+  const canvas=$("photoEditorCanvas"),margin=26;
+  return {x:margin,y:margin,w:canvas.width-margin*2,h:canvas.height-margin*2,cx:canvas.width/2,cy:canvas.height/2}
+}
+function photoEditorCropRect(){
+  const stage=photoEditorStageRect();
+  const c=photoEditorState.crop;
+  if(!c)return {...stage};
+  return {x:c.x,y:c.y,w:c.w,h:c.h,cx:c.x+c.w/2,cy:c.y+c.h/2}
+}
+function photoEditorOriginalRatio(){
   const s=photoEditorRotatedSize();
   return s.w/Math.max(1,s.h)
 }
-function photoEditorCropRect(){
-  const canvas=$("photoEditorCanvas"),margin=34;
-  const maxW=canvas.width-margin*2,maxH=canvas.height-margin*2;
-  const ratio=photoEditorAspectRatio();
+function cropRectForRatio(ratio,fill=.90){
+  const stage=photoEditorStageRect();
+  const maxW=stage.w*fill,maxH=stage.h*fill;
   let w=maxW,h=w/ratio;
   if(h>maxH){h=maxH;w=h*ratio}
-  return {x:(canvas.width-w)/2,y:(canvas.height-h)/2,w,h,cx:canvas.width/2,cy:canvas.height/2}
+  return {x:stage.cx-w/2,y:stage.cy-h/2,w,h}
+}
+function initPhotoEditorCrop(){
+  photoEditorState.crop=cropRectForRatio(photoEditorOriginalRatio(),.90)
+}
+function applyPhotoEditorCropPreset(preset){
+  let ratio=photoEditorOriginalRatio();
+  if(preset==="1:1")ratio=1;
+  if(preset==="4:3")ratio=4/3;
+  if(preset==="3:4")ratio=3/4;
+  photoEditorState.crop=cropRectForRatio(ratio,.90);
+  renderPhotoEditor()
 }
 function photoEditorBaseScale(){
-  const crop=photoEditorCropRect(),s=photoEditorRotatedSize();
-  return Math.max(crop.w/s.w,crop.h/s.h)
+  const stage=photoEditorStageRect(),s=photoEditorRotatedSize();
+  // 写真は編集ステージ全体を常に覆う。枠を広げても黒い余白が保存されない。
+  return Math.max(stage.w/s.w,stage.h/s.h)
+}
+function clampPhotoEditorCrop(){
+  if(!photoEditorState.crop)initPhotoEditorCrop();
+  const stage=photoEditorStageRect(),minSize=78,c=photoEditorState.crop;
+  c.w=Math.max(minSize,Math.min(stage.w,c.w));
+  c.h=Math.max(minSize,Math.min(stage.h,c.h));
+  c.x=Math.max(stage.x,Math.min(stage.x+stage.w-c.w,c.x));
+  c.y=Math.max(stage.y,Math.min(stage.y+stage.h-c.h,c.y))
 }
 function clampPhotoEditorView(){
   if(!photoEditorState.img)return;
   photoEditorState.zoom=Math.max(1,Math.min(4,Number(photoEditorState.zoom)||1));
-  const crop=photoEditorCropRect(),s=photoEditorRotatedSize();
+  clampPhotoEditorCrop();
+  const stage=photoEditorStageRect(),s=photoEditorRotatedSize();
   const scale=photoEditorBaseScale()*photoEditorState.zoom;
-  const maxX=Math.max(0,(s.w*scale-crop.w)/2);
-  const maxY=Math.max(0,(s.h*scale-crop.h)/2);
+  const maxX=Math.max(0,(s.w*scale-stage.w)/2);
+  const maxY=Math.max(0,(s.h*scale-stage.h)/2);
   photoEditorState.offsetX=Math.max(-maxX,Math.min(maxX,photoEditorState.offsetX));
-  photoEditorState.offsetY=Math.max(-maxY,Math.min(maxY,photoEditorState.offsetY));
+  photoEditorState.offsetY=Math.max(-maxY,Math.min(maxY,photoEditorState.offsetY))
+}
+function drawPhotoEditorHandleLine(ctx,x1,y1,x2,y2){
+  ctx.lineCap="square";
+  ctx.strokeStyle="rgba(255,255,255,.96)";ctx.lineWidth=10;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  ctx.strokeStyle="#111";ctx.lineWidth=6;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()
+}
+function drawPhotoEditorCropHandles(ctx,crop){
+  const x=crop.x,y=crop.y,r=x+crop.w,b=y+crop.h,mx=x+crop.w/2,my=y+crop.h/2,L=25;
+  // 四隅：L字
+  drawPhotoEditorHandleLine(ctx,x,y,x+L,y);drawPhotoEditorHandleLine(ctx,x,y,x,y+L);
+  drawPhotoEditorHandleLine(ctx,r-L,y,r,y);drawPhotoEditorHandleLine(ctx,r,y,r,y+L);
+  drawPhotoEditorHandleLine(ctx,x,b,x+L,b);drawPhotoEditorHandleLine(ctx,x,b-L,x,b);
+  drawPhotoEditorHandleLine(ctx,r-L,b,r,b);drawPhotoEditorHandleLine(ctx,r,b-L,r,b);
+  // 四辺中央
+  drawPhotoEditorHandleLine(ctx,mx-L/2,y,mx+L/2,y);
+  drawPhotoEditorHandleLine(ctx,mx-L/2,b,mx+L/2,b);
+  drawPhotoEditorHandleLine(ctx,x,my-L/2,x,my+L/2);
+  drawPhotoEditorHandleLine(ctx,r,my-L/2,r,my+L/2)
 }
 function renderPhotoEditor(){
   const canvas=$("photoEditorCanvas"),img=photoEditorState.img;if(!canvas||!img)return;
   clampPhotoEditorView();
-  const ctx=canvas.getContext("2d",{alpha:false}),crop=photoEditorCropRect();
+  const ctx=canvas.getContext("2d",{alpha:false}),crop=photoEditorCropRect(),stage=photoEditorStageRect();
   const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
   const scale=photoEditorBaseScale()*photoEditorState.zoom;
+
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.fillStyle="#111";ctx.fillRect(0,0,canvas.width,canvas.height);
 
   ctx.save();
-  ctx.translate(crop.cx+photoEditorState.offsetX,crop.cy+photoEditorState.offsetY);
+  ctx.translate(stage.cx+photoEditorState.offsetX,stage.cy+photoEditorState.offsetY);
   ctx.rotate(photoEditorState.rotation*Math.PI/180);
   ctx.scale(scale,scale);
   ctx.drawImage(img,-w/2,-h/2,w,h);
   ctx.restore();
 
-  // Crop outside darkening
+  // トリミング枠外を暗くする
   ctx.fillStyle="rgba(0,0,0,.58)";
   ctx.fillRect(0,0,canvas.width,crop.y);
   ctx.fillRect(0,crop.y+crop.h,canvas.width,canvas.height-(crop.y+crop.h));
   ctx.fillRect(0,crop.y,crop.x,crop.h);
   ctx.fillRect(crop.x+crop.w,crop.y,canvas.width-(crop.x+crop.w),crop.h);
 
-  // Crop frame + thirds grid
-  ctx.strokeStyle="rgba(255,255,255,.97)";ctx.lineWidth=3;
+  // 枠と3分割グリッド
+  ctx.strokeStyle="rgba(255,255,255,.96)";ctx.lineWidth=2;
   ctx.strokeRect(crop.x,crop.y,crop.w,crop.h);
-  ctx.strokeStyle="rgba(255,255,255,.45)";ctx.lineWidth=1;
+  ctx.strokeStyle="rgba(255,255,255,.42)";ctx.lineWidth=1;
   for(const p of [1/3,2/3]){
     ctx.beginPath();ctx.moveTo(crop.x+crop.w*p,crop.y);ctx.lineTo(crop.x+crop.w*p,crop.y+crop.h);ctx.stroke();
     ctx.beginPath();ctx.moveTo(crop.x,crop.y+crop.h*p);ctx.lineTo(crop.x+crop.w,crop.y+crop.h*p);ctx.stroke()
   }
-  if($("photoEditorZoom"))$("photoEditorZoom").value=String(photoEditorState.zoom);
+  drawPhotoEditorCropHandles(ctx,crop);
+
+  if($("photoEditorZoom"))$("photoEditorZoom").value=String(photoEditorState.zoom)
 }
-function resetPhotoEditorView(resetAspect=false){
+function resetPhotoEditorView(){
   photoEditorState.rotation=0;
   photoEditorState.zoom=1;
   photoEditorState.offsetX=0;
   photoEditorState.offsetY=0;
-  if(resetAspect)photoEditorState.aspect="original";
-  photoEditorState.pointers.clear();photoEditorState.lastSingle=null;photoEditorState.lastPinch=null;
-  document.querySelectorAll("#photoEditorAspectButtons button").forEach(b=>b.classList.toggle("active",b.dataset.aspect===photoEditorState.aspect));
+  photoEditorState.pointers.clear();
+  photoEditorState.lastSingle=null;photoEditorState.lastPinch=null;
+  photoEditorState.interaction=null;photoEditorState.activeHandle=null;
+  initPhotoEditorCrop();
   renderPhotoEditor()
 }
 async function openPhotoEditor(rec,caption=""){
@@ -342,14 +394,15 @@ async function openPhotoEditor(rec,caption=""){
   closePhotoModal();
   photoEditorState.rec=rec;
   photoEditorState.img=null;
-  photoEditorState.rotation=0;photoEditorState.zoom=1;photoEditorState.offsetX=0;photoEditorState.offsetY=0;photoEditorState.aspect="original";
+  photoEditorState.rotation=0;photoEditorState.zoom=1;photoEditorState.offsetX=0;photoEditorState.offsetY=0;photoEditorState.crop=null;
   photoEditorState.pointers.clear();photoEditorState.lastSingle=null;photoEditorState.lastPinch=null;
+  photoEditorState.interaction=null;photoEditorState.activeHandle=null;photoEditorState.startPoint=null;photoEditorState.startCrop=null;
   $("photoEditorCaption").textContent=caption||`${rec.date||""} ${MEAL_LABELS[rec.meal]||""}`;
   $("photoEditorStatus").textContent="画像を読み込んでいます…";
   $("photoEditor").classList.add("open");$("photoEditor").setAttribute("aria-hidden","false");document.body.classList.add("photo-editor-open");
-  document.querySelectorAll("#photoEditorAspectButtons button").forEach(b=>b.classList.toggle("active",b.dataset.aspect==="original"));
   try{
     photoEditorState.img=await loadImageFromFile(rec.blob);
+    initPhotoEditorCrop();
     $("photoEditorStatus").textContent="";
     renderPhotoEditor()
   }catch(e){
@@ -358,18 +411,61 @@ async function openPhotoEditor(rec,caption=""){
 }
 function closePhotoEditor(){
   $("photoEditor").classList.remove("open");$("photoEditor").setAttribute("aria-hidden","true");document.body.classList.remove("photo-editor-open");
-  photoEditorState.rec=null;photoEditorState.img=null;photoEditorState.pointers.clear();photoEditorState.lastSingle=null;photoEditorState.lastPinch=null;
+  photoEditorState.rec=null;photoEditorState.img=null;photoEditorState.crop=null;
+  photoEditorState.pointers.clear();photoEditorState.lastSingle=null;photoEditorState.lastPinch=null;
+  photoEditorState.interaction=null;photoEditorState.activeHandle=null;photoEditorState.startPoint=null;photoEditorState.startCrop=null;
   $("photoEditorStatus").textContent=""
 }
 function rotatePhotoEditor(delta){
   if(!photoEditorState.img)return;
   photoEditorState.rotation=(photoEditorState.rotation+delta+360)%360;
   photoEditorState.zoom=1;photoEditorState.offsetX=0;photoEditorState.offsetY=0;
+  // 枠の大きさ・位置は維持。写真だけ90°回転してPowerPointに近い操作感にする。
   renderPhotoEditor()
 }
 function photoEditorCanvasPoint(e){
   const canvas=$("photoEditorCanvas"),r=canvas.getBoundingClientRect();
   return {x:(e.clientX-r.left)*canvas.width/Math.max(1,r.width),y:(e.clientY-r.top)*canvas.height/Math.max(1,r.height)}
+}
+function pointInPhotoEditorCrop(p){
+  const c=photoEditorCropRect();
+  return p.x>=c.x&&p.x<=c.x+c.w&&p.y>=c.y&&p.y<=c.y+c.h
+}
+function photoEditorHandleAt(p){
+  const c=photoEditorCropRect(),x=c.x,y=c.y,r=x+c.w,b=y+c.h,hit=30;
+  const near=(a,bv)=>Math.abs(a-bv)<=hit;
+  // 四隅を最優先
+  if(near(p.x,x)&&near(p.y,y))return "nw";
+  if(near(p.x,r)&&near(p.y,y))return "ne";
+  if(near(p.x,x)&&near(p.y,b))return "sw";
+  if(near(p.x,r)&&near(p.y,b))return "se";
+  if(p.x>=x-hit&&p.x<=r+hit&&near(p.y,y))return "n";
+  if(p.x>=x-hit&&p.x<=r+hit&&near(p.y,b))return "s";
+  if(p.y>=y-hit&&p.y<=b+hit&&near(p.x,x))return "w";
+  if(p.y>=y-hit&&p.y<=b+hit&&near(p.x,r))return "e";
+  return null
+}
+function cursorForPhotoEditorPoint(p){
+  const h=photoEditorHandleAt(p);
+  if(h==="n"||h==="s")return "ns-resize";
+  if(h==="e"||h==="w")return "ew-resize";
+  if(h==="nw"||h==="se")return "nwse-resize";
+  if(h==="ne"||h==="sw")return "nesw-resize";
+  return pointInPhotoEditorCrop(p)?"move":"default"
+}
+function resizePhotoEditorCrop(handle,p){
+  const stage=photoEditorStageRect(),minSize=78,c0=photoEditorState.startCrop,p0=photoEditorState.startPoint;
+  if(!c0||!p0)return;
+  const dx=p.x-p0.x,dy=p.y-p0.y;
+  let left=c0.x,top=c0.y,right=c0.x+c0.w,bottom=c0.y+c0.h;
+
+  if(handle.includes("w"))left=Math.max(stage.x,Math.min(right-minSize,c0.x+dx));
+  if(handle.includes("e"))right=Math.min(stage.x+stage.w,Math.max(left+minSize,c0.x+c0.w+dx));
+  if(handle.includes("n"))top=Math.max(stage.y,Math.min(bottom-minSize,c0.y+dy));
+  if(handle.includes("s"))bottom=Math.min(stage.y+stage.h,Math.max(top+minSize,c0.y+c0.h+dy));
+
+  photoEditorState.crop={x:left,y:top,w:right-left,h:bottom-top};
+  clampPhotoEditorCrop()
 }
 function photoEditorPinchInfo(){
   const pts=[...photoEditorState.pointers.values()];
@@ -379,45 +475,87 @@ function photoEditorPinchInfo(){
 }
 function setupPhotoEditorGestures(){
   const canvas=$("photoEditorCanvas");if(!canvas)return;
+
   canvas.addEventListener("pointerdown",e=>{
     if(!photoEditorState.img)return;
     e.preventDefault();
     try{canvas.setPointerCapture(e.pointerId)}catch(_){}
-    const p=photoEditorCanvasPoint(e);photoEditorState.pointers.set(e.pointerId,p);
-    if(photoEditorState.pointers.size===1){photoEditorState.lastSingle=p;photoEditorState.lastPinch=null}
-    else if(photoEditorState.pointers.size>=2){photoEditorState.lastPinch=photoEditorPinchInfo();photoEditorState.lastSingle=null}
-  });
-  canvas.addEventListener("pointermove",e=>{
-    if(!photoEditorState.img||!photoEditorState.pointers.has(e.pointerId))return;
-    e.preventDefault();
-    const p=photoEditorCanvasPoint(e);photoEditorState.pointers.set(e.pointerId,p);
+    const p=photoEditorCanvasPoint(e);
+    photoEditorState.pointers.set(e.pointerId,p);
+
     if(photoEditorState.pointers.size===1){
-      const last=photoEditorState.lastSingle;
-      if(last){photoEditorState.offsetX+=p.x-last.x;photoEditorState.offsetY+=p.y-last.y}
-      photoEditorState.lastSingle=p
-    }else{
+      const handle=photoEditorHandleAt(p);
+      if(handle){
+        photoEditorState.interaction="crop";
+        photoEditorState.activeHandle=handle;
+        photoEditorState.startPoint={...p};
+        const c=photoEditorCropRect();
+        photoEditorState.startCrop={x:c.x,y:c.y,w:c.w,h:c.h};
+        photoEditorState.lastSingle=null;photoEditorState.lastPinch=null
+      }else if(pointInPhotoEditorCrop(p)){
+        photoEditorState.interaction="image";
+        photoEditorState.lastSingle=p;photoEditorState.lastPinch=null
+      }else{
+        photoEditorState.interaction=null;
+        photoEditorState.lastSingle=null;photoEditorState.lastPinch=null
+      }
+    }else if(photoEditorState.pointers.size>=2 && photoEditorState.interaction!=="crop"){
+      photoEditorState.interaction="pinch";
+      photoEditorState.lastPinch=photoEditorPinchInfo();
+      photoEditorState.lastSingle=null
+    }
+  });
+
+  canvas.addEventListener("pointermove",e=>{
+    const p=photoEditorCanvasPoint(e);
+
+    // マウスではハンドルに合わせてカーソル形状も変更
+    if(!photoEditorState.pointers.has(e.pointerId)){
+      canvas.style.cursor=cursorForPhotoEditorPoint(p);
+      return
+    }
+    if(!photoEditorState.img)return;
+    e.preventDefault();
+    photoEditorState.pointers.set(e.pointerId,p);
+
+    if(photoEditorState.interaction==="crop"&&photoEditorState.pointers.size===1){
+      resizePhotoEditorCrop(photoEditorState.activeHandle,p)
+    }else if(photoEditorState.pointers.size>=2&&photoEditorState.interaction!=="crop"){
       const now=photoEditorPinchInfo(),last=photoEditorState.lastPinch;
       if(now&&last){
         photoEditorState.zoom=Math.max(1,Math.min(4,photoEditorState.zoom*(now.dist/Math.max(1,last.dist))));
         photoEditorState.offsetX+=now.mid.x-last.mid.x;
         photoEditorState.offsetY+=now.mid.y-last.mid.y
       }
+      photoEditorState.interaction="pinch";
       photoEditorState.lastPinch=now;photoEditorState.lastSingle=null
+    }else if(photoEditorState.interaction==="image"&&photoEditorState.pointers.size===1){
+      const last=photoEditorState.lastSingle;
+      if(last){photoEditorState.offsetX+=p.x-last.x;photoEditorState.offsetY+=p.y-last.y}
+      photoEditorState.lastSingle=p
     }
     renderPhotoEditor()
   });
+
   const end=e=>{
     photoEditorState.pointers.delete(e.pointerId);
-    if(photoEditorState.pointers.size===1){
-      photoEditorState.lastSingle=[...photoEditorState.pointers.values()][0];photoEditorState.lastPinch=null
-    }else if(photoEditorState.pointers.size>=2){
-      photoEditorState.lastPinch=photoEditorPinchInfo();photoEditorState.lastSingle=null
-    }else{
+    if(photoEditorState.pointers.size===0){
+      photoEditorState.interaction=null;photoEditorState.activeHandle=null;
+      photoEditorState.startPoint=null;photoEditorState.startCrop=null;
       photoEditorState.lastSingle=null;photoEditorState.lastPinch=null
+    }else if(photoEditorState.pointers.size===1){
+      const remaining=[...photoEditorState.pointers.values()][0];
+      photoEditorState.interaction=pointInPhotoEditorCrop(remaining)?"image":null;
+      photoEditorState.lastSingle=remaining;photoEditorState.lastPinch=null
+    }else{
+      photoEditorState.interaction="pinch";
+      photoEditorState.lastPinch=photoEditorPinchInfo();photoEditorState.lastSingle=null
     }
+    renderPhotoEditor()
   };
   canvas.addEventListener("pointerup",end);
-  canvas.addEventListener("pointercancel",end)
+  canvas.addEventListener("pointercancel",end);
+  canvas.addEventListener("pointerleave",e=>{if(photoEditorState.pointers.size===0)canvas.style.cursor="default"})
 }
 async function encodeEditedMealCanvas(canvas){
   let working=canvas,quality=.84,blob=null;
@@ -436,7 +574,7 @@ async function encodeEditedMealCanvas(canvas){
 async function buildEditedMealPhoto(){
   const img=photoEditorState.img;if(!img)throw new Error("編集画像がありません");
   clampPhotoEditorView();
-  const crop=photoEditorCropRect(),ratio=crop.w/crop.h;
+  const crop=photoEditorCropRect(),stage=photoEditorStageRect(),ratio=crop.w/crop.h;
   const displayScale=photoEditorBaseScale()*photoEditorState.zoom;
   const sourceLong=Math.max(crop.w/displayScale,crop.h/displayScale);
   const longSide=Math.max(320,Math.min(1280,Math.round(sourceLong)));
@@ -449,7 +587,7 @@ async function buildEditedMealPhoto(){
   const fx=outW/crop.w,fy=outH/crop.h;
   const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
   ctx.save();
-  ctx.translate((crop.cx+photoEditorState.offsetX-crop.x)*fx,(crop.cy+photoEditorState.offsetY-crop.y)*fy);
+  ctx.translate((stage.cx+photoEditorState.offsetX-crop.x)*fx,(stage.cy+photoEditorState.offsetY-crop.y)*fy);
   ctx.rotate(photoEditorState.rotation*Math.PI/180);
   ctx.scale(displayScale*fx,displayScale*fy);
   ctx.drawImage(img,-w/2,-h/2,w,h);
@@ -2590,7 +2728,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:61,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:62,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
@@ -3140,14 +3278,11 @@ $("photoEditorClose").onclick=closePhotoEditor;
 $("photoEditorCancelBottom").onclick=closePhotoEditor;
 $("photoRotateLeft").onclick=()=>rotatePhotoEditor(-90);
 $("photoRotateRight").onclick=()=>rotatePhotoEditor(90);
-$("photoEditorReset").onclick=()=>resetPhotoEditorView(false);
+$("photoEditorReset").onclick=resetPhotoEditorView;
 $("photoEditorSave").onclick=savePhotoEditor;
 $("photoEditorZoom").addEventListener("input",e=>{photoEditorState.zoom=Number(e.target.value)||1;renderPhotoEditor()});
 document.querySelectorAll("#photoEditorAspectButtons button").forEach(b=>b.onclick=()=>{
-  photoEditorState.aspect=b.dataset.aspect||"original";
-  photoEditorState.zoom=1;photoEditorState.offsetX=0;photoEditorState.offsetY=0;
-  document.querySelectorAll("#photoEditorAspectButtons button").forEach(x=>x.classList.toggle("active",x===b));
-  renderPhotoEditor()
+  applyPhotoEditorCropPreset(b.dataset.aspect||"original");
 });
 setupPhotoEditorGestures();
 
