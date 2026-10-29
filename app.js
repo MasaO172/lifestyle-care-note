@@ -369,13 +369,14 @@ function clampPhotoEditorView(){
 }
 function drawPhotoEditorHandleLine(ctx,x1,y1,x2,y2){
   ctx.lineCap="square";
-  ctx.strokeStyle="rgba(255,255,255,.96)";ctx.lineWidth=10;
+  // 写真の明暗に関係なく見えるよう、白い太い縁取り＋黒い芯の二重バーにする。
+  ctx.strokeStyle="rgba(255,255,255,.99)";ctx.lineWidth=16;
   ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
-  ctx.strokeStyle="#111";ctx.lineWidth=6;
+  ctx.strokeStyle="#111";ctx.lineWidth=9;
   ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()
 }
 function drawPhotoEditorCropHandles(ctx,crop){
-  const x=crop.x,y=crop.y,r=x+crop.w,b=y+crop.h,mx=x+crop.w/2,my=y+crop.h/2,L=25;
+  const x=crop.x,y=crop.y,r=x+crop.w,b=y+crop.h,mx=x+crop.w/2,my=y+crop.h/2,L=34;
   // 四隅：L字
   drawPhotoEditorHandleLine(ctx,x,y,x+L,y);drawPhotoEditorHandleLine(ctx,x,y,x,y+L);
   drawPhotoEditorHandleLine(ctx,r-L,y,r,y);drawPhotoEditorHandleLine(ctx,r,y,r,y+L);
@@ -412,7 +413,7 @@ function renderPhotoEditor(){
   ctx.fillRect(crop.x+crop.w,crop.y,canvas.width-(crop.x+crop.w),crop.h);
 
   // 枠と3分割グリッド
-  ctx.strokeStyle="rgba(255,255,255,.96)";ctx.lineWidth=2;
+  ctx.strokeStyle="rgba(255,255,255,.99)";ctx.lineWidth=3.5;
   ctx.strokeRect(crop.x,crop.y,crop.w,crop.h);
   ctx.strokeStyle="rgba(255,255,255,.42)";ctx.lineWidth=1;
   for(const p of [1/3,2/3]){
@@ -2779,7 +2780,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:63,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:64,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
