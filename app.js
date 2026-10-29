@@ -267,8 +267,10 @@ function photoEditorRotatedSize(){
   return Math.abs(photoEditorState.rotation)%180===90?{w:h,h:w}:{w,h}
 }
 function photoEditorStageRect(){
-  const canvas=$("photoEditorCanvas"),margin=26;
-  return {x:margin,y:margin,w:canvas.width-margin*2,h:canvas.height-margin*2,cx:canvas.width/2,cy:canvas.height/2}
+  const canvas=$("photoEditorCanvas");
+  // 編集可能領域はCanvas全体。v62の固定26px余白をなくし、
+  // トリミング枠を写真の表示端まで広げられるようにする。
+  return {x:0,y:0,w:canvas.width,h:canvas.height,cx:canvas.width/2,cy:canvas.height/2}
 }
 function photoEditorCropRect(){
   const stage=photoEditorStageRect();
@@ -280,6 +282,19 @@ function photoEditorOriginalRatio(){
   const s=photoEditorRotatedSize();
   return s.w/Math.max(1,s.h)
 }
+function photoEditorVisibleImageRect(){
+  const stage=photoEditorStageRect(),s=photoEditorRotatedSize();
+  const scale=photoEditorBaseScale()*photoEditorState.zoom;
+  const w=s.w*scale,h=s.h*scale;
+  return {
+    x:stage.cx+photoEditorState.offsetX-w/2,
+    y:stage.cy+photoEditorState.offsetY-h/2,
+    w,h,
+    right:stage.cx+photoEditorState.offsetX+w/2,
+    bottom:stage.cy+photoEditorState.offsetY+h/2
+  }
+}
+
 function cropRectForRatio(ratio,fill=.90){
   const stage=photoEditorStageRect();
   const maxW=stage.w*fill,maxH=stage.h*fill;
@@ -288,14 +303,37 @@ function cropRectForRatio(ratio,fill=.90){
   return {x:stage.cx-w/2,y:stage.cy-h/2,w,h}
 }
 function initPhotoEditorCrop(){
-  photoEditorState.crop=cropRectForRatio(photoEditorOriginalRatio(),.90)
+  // デフォルトは現在見えている写真の上下左右いっぱい。
+  const stage=photoEditorStageRect(),imgRect=photoEditorVisibleImageRect();
+  const left=Math.max(stage.x,imgRect.x);
+  const top=Math.max(stage.y,imgRect.y);
+  const right=Math.min(stage.x+stage.w,imgRect.right);
+  const bottom=Math.min(stage.y+stage.h,imgRect.bottom);
+  photoEditorState.crop={x:left,y:top,w:Math.max(78,right-left),h:Math.max(78,bottom-top)};
+  clampPhotoEditorCrop()
 }
 function applyPhotoEditorCropPreset(preset){
   let ratio=photoEditorOriginalRatio();
   if(preset==="1:1")ratio=1;
   if(preset==="4:3")ratio=4/3;
   if(preset==="3:4")ratio=3/4;
-  photoEditorState.crop=cropRectForRatio(ratio,.90);
+
+  const stage=photoEditorStageRect(),imgRect=photoEditorVisibleImageRect();
+  const bounds={
+    x:Math.max(stage.x,imgRect.x),
+    y:Math.max(stage.y,imgRect.y),
+    right:Math.min(stage.x+stage.w,imgRect.right),
+    bottom:Math.min(stage.y+stage.h,imgRect.bottom)
+  };
+  const maxW=Math.max(78,bounds.right-bounds.x),maxH=Math.max(78,bounds.bottom-bounds.y);
+  let w=maxW,h=w/ratio;
+  if(h>maxH){h=maxH;w=h*ratio}
+  photoEditorState.crop={
+    x:bounds.x+(maxW-w)/2,
+    y:bounds.y+(maxH-h)/2,
+    w,h
+  };
+  clampPhotoEditorCrop();
   renderPhotoEditor()
 }
 function photoEditorBaseScale(){
@@ -304,12 +342,19 @@ function photoEditorBaseScale(){
   return Math.max(stage.w/s.w,stage.h/s.h)
 }
 function clampPhotoEditorCrop(){
-  if(!photoEditorState.crop)initPhotoEditorCrop();
-  const stage=photoEditorStageRect(),minSize=78,c=photoEditorState.crop;
-  c.w=Math.max(minSize,Math.min(stage.w,c.w));
-  c.h=Math.max(minSize,Math.min(stage.h,c.h));
-  c.x=Math.max(stage.x,Math.min(stage.x+stage.w-c.w,c.x));
-  c.y=Math.max(stage.y,Math.min(stage.y+stage.h-c.h,c.y))
+  if(!photoEditorState.crop)return;
+  const stage=photoEditorStageRect(),imgRect=photoEditorVisibleImageRect(),minSize=78,c=photoEditorState.crop;
+  const leftBound=Math.max(stage.x,imgRect.x);
+  const topBound=Math.max(stage.y,imgRect.y);
+  const rightBound=Math.min(stage.x+stage.w,imgRect.right);
+  const bottomBound=Math.min(stage.y+stage.h,imgRect.bottom);
+  const maxW=Math.max(minSize,rightBound-leftBound);
+  const maxH=Math.max(minSize,bottomBound-topBound);
+
+  c.w=Math.max(minSize,Math.min(maxW,c.w));
+  c.h=Math.max(minSize,Math.min(maxH,c.h));
+  c.x=Math.max(leftBound,Math.min(rightBound-c.w,c.x));
+  c.y=Math.max(topBound,Math.min(bottomBound-c.h,c.y))
 }
 function clampPhotoEditorView(){
   if(!photoEditorState.img)return;
@@ -420,7 +465,8 @@ function rotatePhotoEditor(delta){
   if(!photoEditorState.img)return;
   photoEditorState.rotation=(photoEditorState.rotation+delta+360)%360;
   photoEditorState.zoom=1;photoEditorState.offsetX=0;photoEditorState.offsetY=0;
-  // 枠の大きさ・位置は維持。写真だけ90°回転してPowerPointに近い操作感にする。
+  // 回転後は写真の縦横が入れ替わるため、枠を新しい写真端いっぱいに合わせ直す。
+  initPhotoEditorCrop();
   renderPhotoEditor()
 }
 function photoEditorCanvasPoint(e){
@@ -454,15 +500,20 @@ function cursorForPhotoEditorPoint(p){
   return pointInPhotoEditorCrop(p)?"move":"default"
 }
 function resizePhotoEditorCrop(handle,p){
-  const stage=photoEditorStageRect(),minSize=78,c0=photoEditorState.startCrop,p0=photoEditorState.startPoint;
+  const stage=photoEditorStageRect(),imgRect=photoEditorVisibleImageRect(),minSize=78,c0=photoEditorState.startCrop,p0=photoEditorState.startPoint;
   if(!c0||!p0)return;
   const dx=p.x-p0.x,dy=p.y-p0.y;
+  const leftBound=Math.max(stage.x,imgRect.x);
+  const topBound=Math.max(stage.y,imgRect.y);
+  const rightBound=Math.min(stage.x+stage.w,imgRect.right);
+  const bottomBound=Math.min(stage.y+stage.h,imgRect.bottom);
+
   let left=c0.x,top=c0.y,right=c0.x+c0.w,bottom=c0.y+c0.h;
 
-  if(handle.includes("w"))left=Math.max(stage.x,Math.min(right-minSize,c0.x+dx));
-  if(handle.includes("e"))right=Math.min(stage.x+stage.w,Math.max(left+minSize,c0.x+c0.w+dx));
-  if(handle.includes("n"))top=Math.max(stage.y,Math.min(bottom-minSize,c0.y+dy));
-  if(handle.includes("s"))bottom=Math.min(stage.y+stage.h,Math.max(top+minSize,c0.y+c0.h+dy));
+  if(handle.includes("w"))left=Math.max(leftBound,Math.min(right-minSize,c0.x+dx));
+  if(handle.includes("e"))right=Math.min(rightBound,Math.max(left+minSize,c0.x+c0.w+dx));
+  if(handle.includes("n"))top=Math.max(topBound,Math.min(bottom-minSize,c0.y+dy));
+  if(handle.includes("s"))bottom=Math.min(bottomBound,Math.max(top+minSize,c0.y+c0.h+dy));
 
   photoEditorState.crop={x:left,y:top,w:right-left,h:bottom-top};
   clampPhotoEditorCrop()
@@ -2728,7 +2779,7 @@ function dataURLToBlob(dataURL){
 }
 async function buildBackupPayload(){
   return {
-    app:"生活習慣ケアノート",version:62,exportedAt:new Date().toISOString(),
+    app:"生活習慣ケアノート",version:63,exportedAt:new Date().toISOString(),
     settings:loadSettings(),
     preferences:{
       visitFields:loadVisitFieldSettings(),
@@ -3280,7 +3331,11 @@ $("photoRotateLeft").onclick=()=>rotatePhotoEditor(-90);
 $("photoRotateRight").onclick=()=>rotatePhotoEditor(90);
 $("photoEditorReset").onclick=resetPhotoEditorView;
 $("photoEditorSave").onclick=savePhotoEditor;
-$("photoEditorZoom").addEventListener("input",e=>{photoEditorState.zoom=Number(e.target.value)||1;renderPhotoEditor()});
+$("photoEditorZoom").addEventListener("input",e=>{
+  photoEditorState.zoom=Number(e.target.value)||1;
+  clampPhotoEditorCrop();
+  renderPhotoEditor()
+});
 document.querySelectorAll("#photoEditorAspectButtons button").forEach(b=>b.onclick=()=>{
   applyPhotoEditorCropPreset(b.dataset.aspect||"original");
 });
